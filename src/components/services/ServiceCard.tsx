@@ -1,7 +1,9 @@
 'use client'
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@/components/ui/Button'
+import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
 
 interface ServiceCardProps {
   service: {
@@ -10,61 +12,89 @@ interface ServiceCardProps {
     description: any
     durationMinutes: number
     price: number
-    benefits?: Array<{ benefit: string }>
+    imageUrl?: string | null
+    benefits?: Array<string | { benefit: string }>
   }
   index: number
 }
 
 export function ServiceCard({ service, index }: ServiceCardProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-8% 0px' })
+  const bookingHref = `/booking?service=${service.id}`
+  const fallback = blissoriaServiceThumbForIndex(index)
+
   const descriptionText =
     typeof service.description === 'string'
       ? service.description
       : Array.isArray(service.description?.root?.children)
-      ? service.description.root.children
-          .map((block: any) =>
-            block.children?.map((child: any) => child.text || '').join('') || ''
-          )
-          .join(' ')
-      : 'Premium non-invasive treatment.'
+        ? service.description.root.children
+            .map((block: any) =>
+              block.children?.map((child: any) => child.text || '').join('') || ''
+            )
+            .join(' ')
+        : 'Premium non-invasive treatment.'
+
+  const excerpt =
+    descriptionText.length > 140 ? `${descriptionText.slice(0, 137).trim()}…` : descriptionText
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      className="bg-white border border-[#E0DCD9] rounded-xl p-8 hover:border-[#F4D1C5] transition-all duration-200 group flex flex-col"
+      ref={ref}
+      role="listitem"
+      className="service-list-item"
+      initial={{ opacity: 0, y: 32 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{
+        duration: 0.7,
+        delay: index * 0.07,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
     >
-      <div className="flex items-start justify-between mb-6">
-        <div className="w-12 h-12 rounded-full bg-[#F4D1C5]/30 group-hover:bg-[#F4D1C5]/50 transition-colors" />
-        <span className="text-xs font-medium uppercase tracking-[0.05em] text-[#4A4A4A]/40">
-          {service.durationMinutes} min
-        </span>
-      </div>
-
-      <h3 className="text-xl font-semibold text-[#4A4A4A] mb-3">{service.name}</h3>
-
-      <p className="text-sm text-[#4A4A4A]/60 leading-relaxed mb-6 flex-1 line-clamp-4">
-        {descriptionText}
-      </p>
-
-      {service.benefits && service.benefits.length > 0 && (
-        <ul className="mb-6 space-y-1">
-          {service.benefits.slice(0, 3).map((b, i) => (
-            <li key={i} className="text-xs text-[#4A4A4A]/60 flex items-center gap-2">
-              <span className="text-[#F4D1C5]">✦</span>
-              {b.benefit}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div className="flex items-center justify-between pt-4 border-t border-[#E0DCD9] mt-auto">
-        <span className="text-lg font-semibold text-[#4A4A4A]">${service.price}</span>
-        <Link href={`/booking?service=${service.id}`}>
-          <Button variant="primary" size="sm">Book Now</Button>
-        </Link>
-      </div>
+      <Link
+        href={bookingHref}
+        className="service-card-wrap group/scard block text-inherit no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#6b5344]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#edddc3]"
+      >
+        <div className="service-card-image-wrap">
+          {service.imageUrl ? (
+            <Image
+              src={service.imageUrl}
+              alt={service.name}
+              fill
+              sizes={BLISSORIA_CARD_SIZES}
+              className="service-card-image"
+            />
+          ) : (
+            <img
+              src={fallback.src}
+              srcSet={fallback.srcSet}
+              sizes={BLISSORIA_CARD_SIZES}
+              alt={service.name}
+              loading="lazy"
+              decoding="async"
+              className="service-card-image"
+            />
+          )}
+        </div>
+        <div className="service-card-content-wrapper">
+          <p className="service-card-kicker">{service.durationMinutes} minutes session</p>
+          <div className="service-card-title-wrap">
+            <div className="service-card-title">{service.name}</div>
+          </div>
+          <div className="service-card-text-wrap">
+            <p className="service-card-text">{excerpt}</p>
+          </div>
+          <div className="service-card-price">${service.price}</div>
+          <span className="tertiary-button">
+            <span className="tertiary-button-text-wrap">
+              <span className="tertiary-button-slide">
+                <span className="tertiary-button-text">Book session</span>
+                <span className="tertiary-button-text">Book session</span>
+              </span>
+            </span>
+          </span>
+        </div>
+      </Link>
     </motion.div>
   )
 }

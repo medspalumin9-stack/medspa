@@ -1,12 +1,13 @@
 import { SessionProvider } from 'next-auth/react'
-import { Navbar } from '@/components/layout/Navbar'
-import { Footer } from '@/components/layout/Footer'
+import { FrontendChrome } from '@/components/layout/FrontendChrome'
+import { LoadingScreen } from '@/components/layout/LoadingScreen'
 import type { Metadata } from 'next'
+import '@/styles/blissoria-site.css'
 
 export const metadata: Metadata = {
-  title: 'Lumin MedSpa | Your Glow Up Awaits',
+  title: 'Lumin Medspa | Non-invasive skin rejuvenation',
   description:
-    'Non-invasive skin rejuvenation treatments and premium cosmetics.',
+    'Lumin Medspa offers evidence-based, non-invasive aesthetic treatments in a calm, professional setting.',
 }
 
 export default function FrontendLayout({
@@ -16,9 +17,12 @@ export default function FrontendLayout({
 }) {
   return (
     <SessionProvider>
-      <Navbar />
-      <main className="pt-16 flex-1">{children}</main>
-      <Footer />
+      <div className="page-wrapper">
+        <LoadingScreen />
+        <FrontendChrome>
+          <main className="main flex-1">{children}</main>
+        </FrontendChrome>
+      </div>
     </SessionProvider>
   )
 }

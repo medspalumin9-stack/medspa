@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadClient } from '@/lib/payload'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 export async function POST(req: NextRequest) {
@@ -9,28 +9,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const payload = await getPayloadClient()
-  const existing = await payload.find({
-    collection: 'clients',
-    where: { email: { equals: email } },
-    limit: 1,
-  })
-
-  if (existing.docs.length > 0) {
+  const existing = await prisma.user.findUnique({ where: { email } })
+  if (existing) {
     return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
   }
 
   const passwordHash = await bcrypt.hash(password, 12)
 
-  const client = await payload.create({
-    collection: 'clients',
-    data: { email, fullName, phone: phone || '', passwordHash },
+  const user = await prisma.user.create({
+    data: { email, fullName, phone: phone || null, passwordHash, role: 'CLIENT' },
   })
 
-  await payload.create({
-    collection: 'profiles',
-    data: { client: client.id },
-  })
+  await prisma.profile.create({ data: { userId: user.id } })
 
   return NextResponse.json({ success: true })
 }

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadClient } from '@/lib/payload'
+import { prisma } from '@/lib/prisma'
 import { sendAppointmentReminder } from '@/lib/resend'
 import { sendReminderSMS } from '@/lib/twilio'
-import { addHours, subMinutes, addMinutes, parseISO, format } from 'date-fns'
+import { addHours, subMinutes, addMinutes, format } from 'date-fns'
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -10,106 +10,68 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const payload = await getPayloadClient()
   const now = new Date()
-  const WINDOW = 15 // ±15 minute window for matching
+  const WINDOW = 15
 
-  // 24-hour reminders: appointments starting 24h from now (±15 min)
+  // 24-hour reminders
   const target24h = addHours(now, 24)
-  const { docs: upcoming24 } = await payload.find({
-    collection: 'appointments',
+  const upcoming24 = await prisma.appointment.findMany({
     where: {
-      status: { in: ['scheduled', 'confirmed'] },
-      reminderSent24h: { equals: false },
+      status: { in: ['SCHEDULED', 'CONFIRMED'] },
+      reminderSent24h: false,
       startTime: {
-        greater_than_equal: subMinutes(target24h, WINDOW).toISOString(),
-        less_than_equal: addMinutes(target24h, WINDOW).toISOString(),
+        gte: subMinutes(target24h, WINDOW),
+        lte: addMinutes(target24h, WINDOW),
       },
     },
-    limit: 50,
-    depth: 1,
+    include: { service: true },
   })
 
   let processed24h = 0
   for (const appt of upcoming24) {
-    const dateStr = format(parseISO(String(appt.startTime)), "MMMM d 'at' h:mm a")
-    const serviceName =
-      typeof appt.service === 'object' ? (appt.service as any).name : 'appointment'
-
-    await Promise.allSettled([
-      sendAppointmentReminder(
-        appt.clientEmail as string,
-        appt.clientName as string,
-        serviceName,
-        dateStr,
-        false
-      ),
-      sendReminderSMS(
-        appt.clientPhone as string,
-        appt.clientName as string,
-        serviceName,
-        dateStr,
-        false
-      ),
-      payload.update({
-        collection: 'appointments',
-        id: appt.id,
-        data: { reminderSent24h: true },
-      }),
-    ])
+    const dateStr = format(appt.startTime, "MMMM d 'at' h:mm a")
+    const channel = appt.reminderChannel ?? 'EMAIL'
+    const tasks: Promise<unknown>[] = []
+    if (channel === 'EMAIL') {
+      tasks.push(sendAppointmentReminder(appt.clientEmail, appt.clientName, appt.service.name, dateStr, false))
+    } else {
+      tasks.push(sendReminderSMS(appt.clientPhone, appt.clientName, appt.service.name, dateStr, false))
+    }
+    tasks.push(
+      prisma.appointment.update({ where: { id: appt.id }, data: { reminderSent24h: true } })
+    )
+    await Promise.allSettled(tasks)
     processed24h++
   }
 
-  // 1-hour reminders: appointments starting 1h from now (±15 min)
+  // 1-hour reminders
   const target1h = addHours(now, 1)
-  const { docs: upcoming1h } = await payload.find({
-    collection: 'appointments',
+  const upcoming1h = await prisma.appointment.findMany({
     where: {
-      status: { in: ['scheduled', 'confirmed'] },
-      reminderSent1h: { equals: false },
+      status: { in: ['SCHEDULED', 'CONFIRMED'] },
+      reminderSent1h: false,
       startTime: {
-        greater_than_equal: subMinutes(target1h, WINDOW).toISOString(),
-        less_than_equal: addMinutes(target1h, WINDOW).toISOString(),
+        gte: subMinutes(target1h, WINDOW),
+        lte: addMinutes(target1h, WINDOW),
       },
     },
-    limit: 50,
-    depth: 1,
+    include: { service: true },
   })
 
   let processed1h = 0
   for (const appt of upcoming1h) {
-    const dateStr = format(parseISO(String(appt.startTime)), 'h:mm a')
-    const serviceName =
-      typeof appt.service === 'object' ? (appt.service as any).name : 'appointment'
-
-    await Promise.allSettled([
-      sendAppointmentReminder(
-        appt.clientEmail as string,
-        appt.clientName as string,
-        serviceName,
-        dateStr,
-        true
-      ),
-      sendReminderSMS(
-        appt.clientPhone as string,
-        appt.clientName as string,
-        serviceName,
-        dateStr,
-        true
-      ),
-      payload.update({
-        collection: 'appointments',
-        id: appt.id,
-        data: { reminderSent1h: true },
-      }),
-    ])
+    const dateStr = format(appt.startTime, 'h:mm a')
+    const channel = appt.reminderChannel ?? 'EMAIL'
+    const tasks: Promise<unknown>[] = []
+    if (channel === 'EMAIL') {
+      tasks.push(sendAppointmentReminder(appt.clientEmail, appt.clientName, appt.service.name, dateStr, true))
+    } else {
+      tasks.push(sendReminderSMS(appt.clientPhone, appt.clientName, appt.service.name, dateStr, true))
+    }
+    tasks.push(prisma.appointment.update({ where: { id: appt.id }, data: { reminderSent1h: true } }))
+    await Promise.allSettled(tasks)
     processed1h++
   }
 
-  return NextResponse.json({
-    ok: true,
-    processed24h,
-    processed1h,
-    checkedAt: now.toISOString(),
-  })
+  return NextResponse.json({ ok: true, processed24h, processed1h, checkedAt: now.toISOString() })
 }

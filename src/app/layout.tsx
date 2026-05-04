@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Lumin MedSpa | Your Glow Up Awaits',
+  title: 'Lumin Medspa | Non-invasive skin rejuvenation',
   description:
-    'Non-invasive skin rejuvenation treatments and premium cosmetics. Book your glow up today.',
+    'Lumin Medspa — evidence-based aesthetic care and non-invasive skin rejuvenation.',
 }
 
 export default function RootLayout({
@@ -14,6 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        <link href="https://cdn.prod.website-files.com" rel="preconnect" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   )

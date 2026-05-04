@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { getPayloadClient } from '@/lib/payload'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   const session = await auth()
@@ -9,34 +9,41 @@ export async function GET() {
   }
 
   try {
-    const payload = await getPayloadClient()
-
-    const { docs: appointments } = await payload.find({
-      collection: 'appointments',
-      where: { clientEmail: { equals: session.user.email } },
-      sort: '-startTime',
-      limit: 20,
-      depth: 2,
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: session.user.email, mode: 'insensitive' } },
+      include: {
+        profile: {
+          include: {
+            recommendedProducts: { include: { product: true } },
+          },
+        },
+      },
     })
 
-    const { docs: clients } = await payload.find({
-      collection: 'clients',
-      where: { email: { equals: session.user.email } },
-      limit: 1,
-    })
-
-    let profile = null
-    if (clients[0]) {
-      const { docs: profiles } = await payload.find({
-        collection: 'profiles',
-        where: { client: { equals: clients[0].id } },
-        limit: 1,
-        depth: 2,
-      })
-      profile = profiles[0] || null
+    if (!user) {
+      return NextResponse.json({ appointments: [], profile: null })
     }
 
-    return NextResponse.json({ appointments, profile })
+    const rows = await prisma.appointment.findMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          { clientEmail: { equals: user.email, mode: 'insensitive' } },
+        ],
+      },
+      include: { service: true, staff: true },
+      orderBy: { startTime: 'asc' },
+      take: 40,
+    })
+    const byId = new Map(rows.map((a) => [a.id, a]))
+    const appointments = Array.from(byId.values()).sort(
+      (a, b) => +new Date(a.startTime) - +new Date(b.startTime)
+    )
+
+    return NextResponse.json({
+      appointments,
+      profile: user.profile ?? null,
+    })
   } catch {
     return NextResponse.json({ appointments: [], profile: null })
   }

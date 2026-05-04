@@ -1,0 +1,346 @@
+/**
+ * Blissoria services page — scoped clone of Webflow template tokens + classes.
+ * https://blissoria.webflow.io/services
+ * (Does not import the full Webflow bundle to avoid global resets.)
+ */
+
+.blissoria-services-scope {
+  --bliss-dark: #1e211e;
+  --bliss-white-rock: #f4e6cd;
+  --bliss-white: #fff;
+  --bliss-almond: #edddc3;
+  --bliss-radius-m: 16px;
+  --bliss-radius-s: 8px;
+  --bliss-radius-pill: 100px;
+  --bliss-h4-size: 32px;
+  --bliss-h4-lh: 40px;
+  --bliss-btn-size: 18px;
+  --bliss-btn-lh: 28px;
+  --bliss-services-pad-y: 140px;
+  --bliss-services-pad-y-lg: 200px;
+}
+
+.blissoria-services-scope .container {
+  width: 100%;
+  max-width: 1720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.blissoria-services-scope .services {
+  padding-top: var(--bliss-services-pad-y-lg);
+  padding-bottom: 140px;
+  background-color: var(--bliss-almond);
+}
+
+/* Tighter gap below global nav for catalog-style pages (Services, Shop) */
+.blissoria-services-scope .services.services-tight-nav {
+  padding-top: 4.5rem;
+  padding-bottom: 100px;
+}
+
+.blissoria-services-scope .services.services-tight-nav .services-title-wrap {
+  margin-bottom: 28px;
+}
+
+@media screen and (max-width: 991px) {
+  .blissoria-services-scope .services {
+    padding-top: var(--bliss-services-pad-y);
+    padding-bottom: 120px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .blissoria-services-scope .services {
+    padding-top: 110px;
+    padding-bottom: 100px;
+  }
+
+  .blissoria-services-scope .services.services-tight-nav {
+    padding-top: 4rem;
+    padding-bottom: 88px;
+  }
+
+  .blissoria-services-scope .services.services-tight-nav .services-title-wrap {
+    margin-bottom: 24px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .blissoria-services-scope .services.services-tight-nav {
+    padding-top: 5rem;
+    padding-bottom: 120px;
+  }
+}
+
+.blissoria-services-scope .services-title-wrap {
+  margin-bottom: 48px;
+}
+
+@media screen and (max-width: 991px) {
+  .blissoria-services-scope .services-title-wrap {
+    margin-bottom: 40px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .blissoria-services-scope .services-title-wrap {
+    margin-bottom: 32px;
+  }
+}
+
+.blissoria-services-scope .services-title {
+  margin: 0;
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-dark);
+  font-size: clamp(2.75rem, 6.5vw, 5.25rem);
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+@media screen and (max-width: 767px) {
+  .blissoria-services-scope .services-title {
+    letter-spacing: -0.02em;
+  }
+}
+
+.blissoria-services-scope .services-cards-wrap {
+  display: block;
+}
+
+.blissoria-services-scope .service-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 24px;
+  grid-row-gap: 24px;
+}
+
+@media screen and (max-width: 991px) {
+  .blissoria-services-scope .service-list {
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 24px;
+    grid-row-gap: 24px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .blissoria-services-scope .service-list {
+    grid-template-columns: 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+  }
+}
+
+.blissoria-services-scope .service-card-wrap {
+  border-radius: var(--bliss-radius-m);
+  background-color: var(--bliss-white);
+  cursor: pointer;
+  display: flex;
+  flex-flow: column;
+  padding: 16px;
+  height: 100%;
+  transition: box-shadow 0.35s ease;
+}
+
+.blissoria-services-scope .service-card-wrap:hover {
+  box-shadow: 0 24px 48px rgba(30, 33, 30, 0.12);
+}
+
+.blissoria-services-scope .service-card-wrap:hover .service-card-title {
+  color: var(--bliss-tan-accent, #6b5344);
+}
+
+.blissoria-services-scope .service-card-image-wrap {
+  margin-bottom: 24px;
+}
+
+@media screen and (max-width: 991px) {
+  .blissoria-services-scope .service-card-image-wrap {
+    margin-bottom: 20px;
+  }
+}
+
+.blissoria-services-scope .service-card-content-wrapper {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.blissoria-services-scope .service-card-kicker {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  line-height: 1.4;
+  color: #8a7b6a;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.blissoria-services-scope .service-card-title-wrap {
+  margin-bottom: 8px;
+  text-decoration: none;
+}
+
+.blissoria-services-scope .service-card-title {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-dark);
+  font-size: var(--bliss-h4-size);
+  line-height: var(--bliss-h4-lh);
+  font-weight: 400;
+  letter-spacing: -0.03125em;
+  transition: color 0.28s ease-in;
+}
+
+@media screen and (max-width: 767px) {
+  .blissoria-services-scope .service-card-title {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+.blissoria-services-scope .service-card-text-wrap {
+  margin-bottom: 24px;
+  flex: 1;
+}
+
+@media screen and (max-width: 991px) {
+  .blissoria-services-scope .service-card-text-wrap {
+    margin-bottom: 20px;
+  }
+}
+
+.blissoria-services-scope .service-card-text {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  color: var(--bliss-dark);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.blissoria-services-scope .service-card-price {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bliss-dark);
+  margin-bottom: 16px;
+}
+
+/* Tertiary / “Read more” — full-width pill, Webflow pattern */
+.blissoria-services-scope .tertiary-button {
+  border: 1px solid var(--bliss-dark);
+  border-radius: var(--bliss-radius-pill);
+  color: var(--bliss-dark);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: var(--bliss-btn-size);
+  line-height: var(--bliss-btn-lh);
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 12px 32px;
+  text-decoration: none;
+  transition: all 0.28s ease-in;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.blissoria-services-scope .tertiary-button:hover {
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+}
+
+.blissoria-services-scope .service-card-wrap:hover .tertiary-button {
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+}
+
+.blissoria-services-scope .tertiary-button:hover .tertiary-button-slide,
+.blissoria-services-scope .service-card-wrap:hover .tertiary-button-slide {
+  transform: translateY(-50%);
+}
+
+.blissoria-services-scope .tertiary-button-text-wrap {
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 28px;
+  overflow: hidden;
+}
+
+.blissoria-services-scope .tertiary-button-slide {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 1);
+}
+
+.blissoria-services-scope .tertiary-button-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 28px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.blissoria-services-scope .services-page-bottom {
+  padding: 48px 20px 80px;
+  background-color: var(--bliss-almond);
+  text-align: center;
+}
+
+.blissoria-services-scope .services-page-bottom p {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  color: var(--bliss-dark);
+  opacity: 0.85;
+  max-width: 32rem;
+  margin: 0 auto 28px;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.blissoria-services-scope .services-page-bottom .bliss-primary-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--bliss-radius-pill);
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 36px;
+  text-decoration: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.blissoria-services-scope .services-page-bottom .bliss-primary-cta:hover {
+  opacity: 0.92;
+}
+
+/* Booking page: tighter hero so the wizard stays in the first viewport. */
+.blissoria-services-scope .services.bliss-booking-section {
+  padding-top: 72px;
+  padding-bottom: 100px;
+}
+
+@media screen and (min-width: 768px) {
+  .blissoria-services-scope .services.bliss-booking-section {
+    padding-top: 88px;
+    padding-bottom: 120px;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .blissoria-services-scope .services.bliss-booking-section {
+    padding-top: 96px;
+    padding-bottom: 140px;
+  }
+}

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum ReminderChannel {
+  EMAIL
+  SMS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  fullName     String
+  phone        String?
+  passwordHash String
+  role         Role     @default(CLIENT)
+  createdAt    DateTime @default(now())
+
+  profile      Profile?
+  appointments Appointment[]
+}
+
+model Profile {
+  id                        String    @id @default(cuid())
+  userId                    String    @unique
+  user                      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  practitionerComments      String?
+  skinGoals                 String?
+  cosmeticNotes             String?
+  technicianRecommendations String? @db.Text
+  glowRoadmap               String? @db.Text
+
+  recommendedProducts ProfileProduct[]
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  durationMinutes Int
+  price           Float
+  imageUrl        String?
+  isActive        Boolean  @default(true)
+  benefits        String[]
+  createdAt       DateTime @default(now())
+
+  staffServices   StaffService[]
+  appointments    Appointment[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  imageUrl    String
+  category    String?
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  profileProducts ProfileProduct[]
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String?
+  avatarUrl String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  staffServices StaffService[]
+  appointments  Appointment[]
+}
+
+model StaffService {
+  staffId   String
+  serviceId String
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([staffId, serviceId])
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  clientEmail      String
+  clientName       String
+  clientPhone      String
+  serviceId        String
+  staffId          String
+  startTime        DateTime
+  endTime          DateTime
+  status           AppointmentStatus @default(SCHEDULED)
+  confirmationSent Boolean           @default(false)
+  reminderSent24h  Boolean           @default(false)
+  reminderSent1h   Boolean           @default(false)
+  notes            String?
+  userId           String?
+  reminderChannel  ReminderChannel   @default(EMAIL)
+  createdAt        DateTime          @default(now())
+
+  service Service @relation(fields: [serviceId], references: [id])
+  staff   Staff   @relation(fields: [staffId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+}
+
+model ProfileProduct {
+  profileId String
+  productId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, productId])
+}

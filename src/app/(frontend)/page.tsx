@@ -1,13 +1,13 @@
 import { HeroSection } from '@/components/home/HeroSection'
-import { ServicesPreview } from '@/components/home/ServicesPreview'
-import { FeaturedProducts } from '@/components/home/FeaturedProducts'
+import { IntroSection } from '@/components/home/IntroSection'
+import { BlissoriaLandingSections } from '@/components/home/BlissoriaLandingSections'
 
 export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <ServicesPreview />
-      <FeaturedProducts />
+      <IntroSection />
+      <BlissoriaLandingSections />
     </>
   )
 }

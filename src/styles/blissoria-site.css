@@ -1,0 +1,1016 @@
+/**
+ * Blissoria global chrome — navbar & footer (ported from Webflow template tokens).
+ * https://blissoria.webflow.io/
+ */
+
+.page-wrapper {
+  --bliss-dark: #1e211e;
+  --bliss-white-rock: #f4e6cd;
+  --bliss-white: #ffffff;
+  --bliss-almond: #edddc3;
+  --bliss-lion: #bda06e;
+}
+
+.bliss-container {
+  width: 100%;
+  max-width: 1720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* —— Navbar —— */
+.bliss-navbar {
+  min-width: 100%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  overflow: visible;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.45s cubic-bezier(0.25, 0.46, 0.45, 1),
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
+.bliss-navbar.bliss-navbar--solid {
+  background-color: var(--bliss-white-rock);
+  border-bottom-color: rgba(30, 33, 30, 0.08);
+  box-shadow: 0 12px 40px rgba(30, 33, 30, 0.07);
+}
+
+/* Hero / video: glass rail + light links */
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-menu-pill {
+  background: rgba(26, 23, 20, 0.42);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-link {
+  background: rgba(250, 249, 247, 0.14);
+  color: #faf8f5;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-link:hover,
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-link[aria-current='page'] {
+  background: rgba(250, 249, 247, 0.3);
+  color: #ffffff;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-link-slide .bliss-nav-link-text-line:first-child {
+  color: rgba(250, 249, 247, 0.62);
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-link-slide .bliss-nav-link-text-line:last-child {
+  color: #faf8f5;
+}
+
+.bliss-navbar--solid .bliss-brand-name {
+  color: var(--bliss-dark);
+}
+
+.bliss-navbar--solid .bliss-brand-tagline {
+  color: #6b5344;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-brand-name {
+  color: #faf8f5;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-brand-tagline {
+  color: rgba(250, 249, 247, 0.62);
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-ghost {
+  color: rgba(250, 249, 247, 0.88);
+  opacity: 1;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-nav-ghost:hover {
+  color: #ffffff;
+}
+
+.bliss-navbar:not(.bliss-navbar--solid) .bliss-menu-bar {
+  background-color: #faf8f5;
+}
+
+.bliss-nav-wrapper {
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
+.bliss-brand-logo {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-left: 0;
+  text-decoration: none;
+  color: var(--bliss-dark);
+  flex-shrink: 0;
+}
+
+.bliss-brand-logo:hover {
+  opacity: 0.88;
+}
+
+.bliss-nav-center {
+  display: none;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .bliss-nav-center {
+    display: flex;
+  }
+}
+
+.bliss-nav-menu-pill {
+  grid-column-gap: 6px;
+  grid-row-gap: 6px;
+  background-color: var(--bliss-almond);
+  border-radius: 100px;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.bliss-nav-link {
+  grid-column-gap: 10px;
+  grid-row-gap: 10px;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  transition-duration: 0.3s;
+  display: flex;
+  background-color: var(--bliss-white-rock);
+  color: var(--bliss-dark);
+  border-radius: 100px;
+  padding: 6px 20px;
+  outline: none;
+}
+
+@media (min-width: 1024px) {
+  .bliss-nav-link {
+    padding: 6px 28px;
+  }
+}
+
+.bliss-nav-link:hover {
+  background-color: var(--bliss-white);
+}
+
+.bliss-nav-link[aria-current='page'] {
+  background-color: var(--bliss-white);
+}
+
+.bliss-nav-link-text-wrap {
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 28px;
+  display: flex;
+  overflow: hidden;
+}
+
+.bliss-nav-link-slide {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 1);
+}
+
+.bliss-nav-link:hover .bliss-nav-link-slide {
+  transform: translateY(-50%);
+}
+
+.bliss-nav-link-text-line {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.bliss-nav-right {
+  grid-column-gap: 12px;
+  grid-row-gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.bliss-secondary-button {
+  z-index: 20;
+  grid-column-gap: 14px;
+  grid-row-gap: 14px;
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+  text-align: center;
+  border-radius: 100px;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 28px;
+  font-size: 18px;
+  line-height: 26px;
+  text-decoration: none;
+  transition: opacity 0.35s;
+  display: none;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .bliss-secondary-button {
+    display: flex;
+  }
+}
+
+.bliss-secondary-button:hover {
+  opacity: 0.95;
+}
+
+.bliss-secondary-button-icon-wrap {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.bliss-secondary-button-icon {
+  z-index: 6;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  transition: opacity 0.35s ease;
+}
+
+.bliss-icon-hover {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  z-index: 6;
+}
+
+.bliss-secondary-button:hover .bliss-secondary-button-icon:not(.bliss-icon-hover) {
+  opacity: 0;
+}
+
+.bliss-secondary-button:hover .bliss-icon-hover {
+  opacity: 1;
+}
+
+.bliss-secondary-button-text {
+  z-index: 6;
+  color: var(--bliss-white-rock);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 18px;
+  line-height: 28px;
+  position: relative;
+  transition: color 0.35s ease;
+}
+
+.bliss-secondary-button-bg {
+  z-index: 5;
+  background-color: var(--bliss-white);
+  border-radius: 100%;
+  width: 150%;
+  height: 400%;
+  position: absolute;
+  inset: auto auto -400% -25px;
+  transform: scale(0);
+  transform-origin: center center;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 1);
+}
+
+.bliss-secondary-button:hover .bliss-secondary-button-bg {
+  transform: scale(1);
+}
+
+.bliss-secondary-button:hover .bliss-secondary-button-text {
+  color: var(--bliss-dark);
+}
+
+.bliss-nav-ghost {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--bliss-dark);
+  opacity: 0.72;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: opacity 0.2s;
+}
+
+.bliss-nav-ghost:hover {
+  opacity: 1;
+}
+
+.bliss-menu-button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-right: -6px;
+}
+
+@media (min-width: 768px) {
+  .bliss-menu-button {
+    display: none;
+  }
+}
+
+.bliss-menu-bar {
+  display: block;
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--bliss-dark);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bliss-mobile-panel {
+  display: none;
+  border-top: 1px solid rgba(30, 33, 30, 0.1);
+  background-color: var(--bliss-white-rock);
+}
+
+.bliss-mobile-panel.is-open {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .bliss-mobile-panel {
+    display: none !important;
+  }
+}
+
+.bliss-mobile-inner {
+  padding: 20px 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bliss-mobile-link {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--bliss-dark);
+  text-decoration: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(237, 221, 195, 0.45);
+}
+
+.bliss-mobile-link:hover {
+  background: var(--bliss-almond);
+}
+
+/* —— Inner pages (shop, booking, etc.) —— */
+.blissoria-inner-page {
+  min-height: 100vh;
+  background-color: var(--bliss-almond);
+}
+
+.blissoria-inner-page .bliss-inner-hero {
+  padding-top: clamp(100px, 18vw, 160px);
+  padding-bottom: clamp(40px, 8vw, 72px);
+}
+
+.blissoria-inner-page .bliss-inner-hero-eyebrow {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b5344;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.blissoria-inner-page .bliss-inner-hero-title {
+  margin: 0 auto 20px;
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-dark);
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  line-height: 1.08;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  text-align: center;
+  max-width: 980px;
+}
+
+.blissoria-inner-page .bliss-inner-hero-desc {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-weight: 300;
+  color: rgba(30, 33, 30, 0.78);
+  font-size: clamp(15px, 1.8vw, 18px);
+  line-height: 1.65;
+  text-align: center;
+  max-width: 38rem;
+  margin: 0 auto;
+}
+
+/* —— Home: About Us / intro (Blissoria wellness block) —— */
+.bliss-about-section {
+  padding-top: clamp(80px, 12vw, 140px);
+  padding-bottom: clamp(80px, 12vw, 140px);
+  background-color: var(--bliss-white-rock);
+  border-top: 1px solid rgba(30, 33, 30, 0.06);
+}
+
+.bliss-about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(40px, 6vw, 72px);
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .bliss-about-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(48px, 7vw, 90px);
+  }
+}
+
+.bliss-about-eyebrow {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b5344;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.bliss-about-title {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  line-height: 1.12;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--bliss-dark);
+  margin: 0 0 24px;
+}
+
+.bliss-about-copy {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 17px;
+  line-height: 1.65;
+  font-weight: 400;
+  color: var(--bliss-dark);
+  margin: 0;
+  max-width: 36rem;
+}
+
+.bliss-about-copy + .bliss-about-copy {
+  margin-top: 20px;
+}
+
+.bliss-about-cta-wrap {
+  margin-top: 36px;
+}
+
+.bliss-about-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--bliss-dark);
+  border-radius: 100px;
+  color: var(--bliss-dark);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 500;
+  padding: 12px 32px;
+  text-decoration: none;
+  transition: background-color 0.28s ease, color 0.28s ease;
+}
+
+.bliss-about-cta:hover {
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+}
+
+.bliss-about-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(560px, 72vh);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(30, 33, 30, 0.08);
+  box-shadow: 0 24px 56px rgba(30, 33, 30, 0.1);
+  margin: 0 auto;
+}
+
+/* —— Home: “Your Spot Awaits” booking strip (footer-email-box rhythm on almond) —— */
+.bliss-spot-awaits {
+  padding-top: clamp(72px, 12vw, 120px);
+  padding-bottom: clamp(72px, 12vw, 120px);
+  background-color: var(--bliss-almond);
+  border-top: 1px solid rgba(30, 33, 30, 0.06);
+}
+
+.bliss-spot-awaits-card {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  background-color: rgba(237, 221, 195, 0.35);
+  border-radius: 16px;
+  border: 1px solid rgba(30, 33, 30, 0.06);
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: clamp(32px, 6vw, 80px);
+  box-shadow: 0 20px 60px rgba(30, 33, 30, 0.06);
+}
+
+@media screen and (max-width: 991px) {
+  .bliss-spot-awaits-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+.bliss-spot-awaits-title {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  font-size: clamp(1.65rem, 3.2vw, 2.45rem);
+  line-height: 1.18;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--bliss-dark);
+  margin: 0 0 20px;
+}
+
+.bliss-spot-awaits-copy {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 17px;
+  line-height: 1.65;
+  font-weight: 400;
+  color: rgba(30, 33, 30, 0.78);
+  margin: 0;
+  max-width: 28rem;
+}
+
+.bliss-spot-awaits-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@media (min-width: 992px) {
+  .bliss-spot-awaits-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* Full-width Book CTA in this block (navbar hides secondary button below md) */
+.bliss-spot-awaits-actions .bliss-secondary-button {
+  display: flex;
+}
+
+@media screen and (max-width: 767px) {
+  .bliss-spot-awaits-card {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bliss-about-image-wrap {
+    margin: 0;
+    margin-left: auto;
+    max-width: 520px;
+  }
+}
+
+/* —— Sign in / auth form fields (Blissoria form tokens) —— */
+.bliss-auth-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(32px, 5vw, 56px);
+  align-items: stretch;
+  padding-top: clamp(32px, 6vw, 48px);
+  padding-bottom: clamp(48px, 10vw, 80px);
+}
+
+@media (min-width: 1024px) {
+  .bliss-auth-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+}
+
+.bliss-auth-visual {
+  position: relative;
+  display: none;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 420px;
+  border: 1px solid rgba(30, 33, 30, 0.08);
+  box-shadow: 0 24px 56px rgba(30, 33, 30, 0.08);
+}
+
+@media (min-width: 1024px) {
+  .bliss-auth-visual {
+    display: block;
+    min-height: 520px;
+  }
+}
+
+.bliss-auth-visual img {
+  object-fit: cover;
+}
+
+.bliss-auth-panel {
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .bliss-auth-panel {
+    margin: 0;
+    max-width: 420px;
+  }
+}
+
+.bliss-auth-eyebrow {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b5344;
+  margin-bottom: 12px;
+}
+
+.bliss-auth-heading {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--bliss-dark);
+  margin: 0 0 12px;
+}
+
+.bliss-auth-sub {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 17px;
+  line-height: 1.65;
+  font-weight: 300;
+  color: rgba(30, 33, 30, 0.75);
+  margin: 0 0 32px;
+}
+
+.bliss-auth-card {
+  background-color: var(--bliss-white);
+  border: 1px solid rgba(30, 33, 30, 0.1);
+  border-radius: 16px;
+  padding: clamp(28px, 5vw, 40px);
+  box-shadow: 0 20px 50px rgba(30, 33, 30, 0.07);
+}
+
+.bliss-field-label {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-weight: 400;
+  color: var(--bliss-dark);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.bliss-auth-submit {
+  width: 100%;
+  margin-top: 8px;
+  border: none;
+  border-radius: 100px;
+  background-color: var(--bliss-dark);
+  color: var(--bliss-white-rock);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 28px;
+  cursor: pointer;
+  transition: opacity 0.28s ease, background 0.28s ease;
+}
+
+.bliss-auth-submit:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.bliss-auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bliss-auth-footer-note {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  text-align: center;
+  font-size: 15px;
+  color: rgba(30, 33, 30, 0.6);
+  margin-top: 20px;
+}
+
+.bliss-auth-footer-note a {
+  color: #6b5344;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.bliss-auth-footer-note a:hover {
+  text-decoration: underline;
+}
+
+.bliss-auth-hint {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  text-align: center;
+  font-size: 13px;
+  color: rgba(30, 33, 30, 0.45);
+  margin-top: 28px;
+}
+
+.bliss-auth-hint a {
+  color: #6b5344;
+  font-weight: 500;
+}
+
+/* —— Footer —— */
+.bliss-footer.footer {
+  background-color: var(--bliss-lion);
+  padding-top: 300px;
+  padding-bottom: 60px;
+  position: relative;
+}
+
+.bliss-footer .footer-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.bliss-footer .footer-bg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.bliss-footer .footer-bg-tab,
+.bliss-footer .footer-bg-mobile {
+  display: none;
+}
+
+.bliss-footer .footer-top-wrap {
+  grid-column-gap: clamp(32px, 12vw, 240px);
+  grid-row-gap: 40px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-bottom: 100px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.bliss-footer .footer-info-wrap {
+  max-width: 315px;
+}
+
+.bliss-footer .footer-info-title-wrap h4.footer-info-title,
+.bliss-footer h4.footer-info-title {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-white-rock);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.bliss-footer .footer-info-text {
+  color: var(--bliss-white-rock);
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+.bliss-footer .footer-info-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bliss-footer .footer-info-link-wrap {
+  grid-column-gap: 12px;
+  grid-row-gap: 12px;
+  color: var(--bliss-white-rock);
+  justify-content: flex-start;
+  align-items: center;
+  text-decoration: none;
+  transition: all 0.28s ease-in;
+  display: flex;
+  margin-top: 8px;
+}
+
+.bliss-footer .footer-info-link-wrap:hover {
+  color: var(--bliss-white);
+}
+
+.bliss-footer .footer-link-text {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+.bliss-footer .footer-info-icon {
+  font-size: 16px;
+  opacity: 0.9;
+  width: 1.25rem;
+  text-align: center;
+}
+
+.bliss-footer .footer-email-box {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  background-color: rgba(237, 221, 195, 0.078);
+  border-radius: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 60px;
+  padding: clamp(32px, 6vw, 80px);
+}
+
+@media screen and (max-width: 991px) {
+  .bliss-footer .footer-email-box {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+.bliss-footer .footer-title {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-white-rock);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  line-height: 1.15;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.bliss-footer .field-label {
+  font-family: var(--font-display, 'Tenor Sans', sans-serif);
+  color: var(--bliss-white-rock);
+  font-size: 1.35rem;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.bliss-footer .form-input-field-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.bliss-footer .bliss-footer-input {
+  flex: 1;
+  min-width: 200px;
+  background-color: var(--bliss-white-rock);
+  border: 1px solid transparent;
+  border-radius: 100px;
+  padding: 14px 22px;
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 16px;
+  color: var(--bliss-dark);
+}
+
+.bliss-footer .bliss-footer-input::placeholder {
+  color: rgba(30, 33, 30, 0.45);
+}
+
+.bliss-footer .bliss-footer-submit {
+  background-color: var(--bliss-lion);
+  color: var(--bliss-dark);
+  border: none;
+  border-radius: 100px;
+  padding: 14px 28px;
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.28s ease;
+  white-space: nowrap;
+}
+
+.bliss-footer .bliss-footer-submit:hover {
+  background-color: var(--bliss-white-rock);
+}
+
+.bliss-footer .footer-bottom-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+}
+
+.bliss-footer .footer-link-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 28px;
+}
+
+.bliss-footer .footer-link {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  color: rgba(244, 230, 205, 0.75);
+  font-size: 15px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.bliss-footer .footer-link:hover {
+  color: var(--bliss-white-rock);
+}
+
+.bliss-footer .copyright-text {
+  font-family: var(--font-sans, 'Public Sans', sans-serif);
+  color: rgba(244, 230, 205, 0.55);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 991px) {
+  .bliss-footer.footer {
+    padding-top: 160px;
+    padding-bottom: 48px;
+  }
+
+  .bliss-footer .footer-bg-desktop {
+    display: none;
+  }
+
+  .bliss-footer .footer-bg-tab {
+    display: block;
+  }
+
+  .bliss-footer .footer-top-wrap {
+    margin-bottom: 56px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .bliss-footer.footer {
+    padding-top: 124px;
+    padding-bottom: 32px;
+  }
+
+  .bliss-footer .footer-bg-tab {
+    display: none;
+  }
+
+  .bliss-footer .footer-bg-mobile {
+    display: block;
+  }
+
+  .bliss-footer .footer-top-wrap {
+    margin-bottom: 48px;
+  }
+
+  .bliss-footer .footer-email-box {
+    margin-bottom: 40px;
+    padding: 24px;
+  }
+}
