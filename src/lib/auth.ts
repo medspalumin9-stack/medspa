@@ -1,6 +1,5 @@
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 
 function normalizeEmail(raw: unknown) {
@@ -26,6 +25,7 @@ export const authConfig: NextAuthConfig = {
 
         let user
         try {
+          const { prisma } = await import('./prisma')
           user = await prisma.user.findFirst({
             where: { email: { equals: email, mode: 'insensitive' } },
           })
