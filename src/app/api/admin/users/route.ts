@@ -2,13 +2,41 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { requireAdminApi } from '@/lib/admin-guard'
+import type { AdminSectionFlags } from '@/lib/admin-sections'
 
 function normalizeEmail(raw: unknown) {
   return String(raw ?? '').trim().toLowerCase()
 }
 
+function sectionFlagsFromBody(body: Record<string, unknown>, canAccessAdminPortal: boolean): AdminSectionFlags {
+  if (!canAccessAdminPortal) {
+    return {
+      canAdminOverview: false,
+      canAdminBookings: false,
+      canAdminClients: false,
+      canAdminServices: false,
+      canAdminProducts: false,
+      canAdminStaff: false,
+      canAdminUsers: false,
+    }
+  }
+  return {
+    canAdminOverview: Boolean(body.canAdminOverview),
+    canAdminBookings: Boolean(body.canAdminBookings),
+    canAdminClients: Boolean(body.canAdminClients),
+    canAdminServices: Boolean(body.canAdminServices),
+    canAdminProducts: Boolean(body.canAdminProducts),
+    canAdminStaff: Boolean(body.canAdminStaff),
+    canAdminUsers: Boolean(body.canAdminUsers),
+  }
+}
+
+function hasAnyAdminSection(flags: AdminSectionFlags): boolean {
+  return Object.values(flags).some(Boolean)
+}
+
 export async function GET() {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('users')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const users = await prisma.user.findMany({
@@ -21,6 +49,13 @@ export async function GET() {
       role: true,
       canAccessAdminPortal: true,
       canAccessClientPortal: true,
+      canAdminOverview: true,
+      canAdminBookings: true,
+      canAdminClients: true,
+      canAdminServices: true,
+      canAdminProducts: true,
+      canAdminStaff: true,
+      canAdminUsers: true,
       createdAt: true,
     },
   })
@@ -28,16 +63,17 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('users')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+  const body = (await req.json()) as Record<string, unknown>
   const email = normalizeEmail(body.email)
   const password = String(body.password ?? '')
   const fullName = String(body.fullName ?? '').trim()
   const phone = body.phone ? String(body.phone).trim() : null
   const canAccessAdminPortal = Boolean(body.canAccessAdminPortal)
   const canAccessClientPortal = Boolean(body.canAccessClientPortal)
+  const sections = sectionFlagsFromBody(body, canAccessAdminPortal)
 
   if (!email || !password || password.length < 8) {
     return NextResponse.json({ error: 'Email and password (min 8 characters) are required.' }, { status: 400 })
@@ -47,6 +83,9 @@ export async function POST(req: NextRequest) {
   }
   if (!canAccessAdminPortal && !canAccessClientPortal) {
     return NextResponse.json({ error: 'Select at least one portal.' }, { status: 400 })
+  }
+  if (canAccessAdminPortal && !hasAnyAdminSection(sections)) {
+    return NextResponse.json({ error: 'Select at least one admin page, or turn off the admin console.' }, { status: 400 })
   }
 
   const exists = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })
@@ -64,6 +103,7 @@ export async function POST(req: NextRequest) {
       passwordHash,
       canAccessAdminPortal,
       canAccessClientPortal,
+      ...sections,
     },
   })
 
@@ -79,10 +119,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('users')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+  const body = (await req.json()) as Record<string, unknown>
   const id = String(body.id ?? '')
   if (!id) return NextResponse.json({ error: 'User id required.' }, { status: 400 })
 
@@ -93,6 +133,11 @@ export async function PUT(req: NextRequest) {
   const canAccessClientPortal = Boolean(body.canAccessClientPortal)
   if (!canAccessAdminPortal && !canAccessClientPortal) {
     return NextResponse.json({ error: 'Select at least one portal.' }, { status: 400 })
+  }
+
+  const sections = sectionFlagsFromBody(body, canAccessAdminPortal)
+  if (canAccessAdminPortal && !hasAnyAdminSection(sections)) {
+    return NextResponse.json({ error: 'Select at least one admin page, or turn off the admin console.' }, { status: 400 })
   }
 
   const email = body.email !== undefined ? normalizeEmail(body.email) : existing.email
@@ -128,6 +173,7 @@ export async function PUT(req: NextRequest) {
       canAccessAdminPortal,
       canAccessClientPortal,
       role,
+      ...sections,
       ...(passwordHash ? { passwordHash } : {}),
     },
   })

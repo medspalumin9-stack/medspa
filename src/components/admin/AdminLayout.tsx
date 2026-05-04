@@ -1,23 +1,22 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-
-const NAV: [string, string][] = [
-  ['Overview',  '/admin'],
-  ['Bookings',  '/admin/bookings'],
-  ['Clients',   '/admin/clients'],
-  ['Services',  '/admin/services'],
-  ['Shop',      '/admin/products'],
-  ['Staff',     '/admin/staff'],
-  ['Users',     '/admin/users'],
-]
+import { ADMIN_NAV, firstAllowedAdminPath, userHasAdminSection } from '@/lib/admin-sections'
+import type { SessionUserWithAdmin } from '@/lib/admin-guard'
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { data, status } = useSession()
+  const u = data?.user as SessionUserWithAdmin | undefined
+  const navLinks =
+    status === 'loading'
+      ? ADMIN_NAV
+      : ADMIN_NAV.filter((item) => userHasAdminSection(u, item.section))
+  const brandHref = firstAllowedAdminPath(u)
 
   const isCurrent = (href: string) => {
     if (href === '/admin') return pathname === '/admin'
@@ -32,7 +31,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="bliss-nav-wrapper">
             {/* Brand */}
             <Link
-              href="/admin"
+              href={brandHref}
               className="bliss-brand-logo flex-col items-start md:flex-row md:items-center md:gap-3"
             >
               <span className="bliss-brand-name font-display text-[1.35rem] md:text-[1.6rem] leading-none tracking-tight">
@@ -46,7 +45,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             {/* Desktop nav pill */}
             <div className="bliss-nav-center">
               <div className="bliss-nav-menu-pill">
-                {NAV.map(([label, href]) => (
+                {navLinks.map(({ label, href }) => (
                   <Link
                     key={href}
                     href={href}
@@ -94,7 +93,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           {/* Mobile panel */}
           <div className={cn('bliss-mobile-panel', mobileOpen && 'is-open')}>
             <div className="bliss-mobile-inner">
-              {NAV.map(([label, href]) => (
+              {navLinks.map(({ label, href }) => (
                 <Link key={href} href={href} className="bliss-mobile-link" onClick={() => setMobileOpen(false)}>
                   {label}
                 </Link>

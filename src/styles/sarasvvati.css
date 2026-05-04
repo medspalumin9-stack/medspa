@@ -174,8 +174,8 @@ body {
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
 
 .sara-container--wide {
@@ -403,6 +403,8 @@ body {
 .sara-admin-root {
   background: var(--sara-bg);
   min-height: 100svh;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .sara-admin-main {

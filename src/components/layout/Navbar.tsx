@@ -55,11 +55,16 @@ export function BlissNavLink({
 /* ─── Book CTA button ─────────────────────────────────────────────────────── */
 function BookBtn({ href }: { href: string }) {
   return (
-    <Link href={href} className="sara-btn sara-btn--dark" style={{ padding: '10px 20px', fontSize: '13px', gap: '10px' }}>
+    <Link
+      href={href}
+      className="sara-btn sara-btn--dark min-h-[44px] shrink-0 items-center !gap-2.5 !px-3 !py-2.5 !text-[13px] min-[381px]:!px-5"
+      aria-label="Book appointment"
+    >
       <span className="sara-btn-arrow">
         <ArrowRight />
       </span>
-      Book Appointment
+      <span className="hidden min-[381px]:inline">Book Appointment</span>
+      <span className="inline min-[381px]:hidden">Book</span>
     </Link>
   )
 }

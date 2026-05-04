@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Input } from '@/components/ui/Input'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ImageUpload } from '@/components/admin/ImageUpload'
+import { BLISSORIA_CARD_SIZES } from '@/lib/blissoria-card'
 
 type Staff = {
   id: string

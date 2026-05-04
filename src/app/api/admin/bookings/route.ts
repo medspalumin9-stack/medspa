@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireAdminApi } from '@/lib/admin-guard'
+import { requireAdminApi, requireAdminApiBookingsOrClientsRead } from '@/lib/admin-guard'
 
 export async function GET() {
-  const session = await requireAdminApi()
+  const session = await requireAdminApiBookingsOrClientsRead()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const appointments = await prisma.appointment.findMany({
@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('bookings')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id, status, staffId, startTime, notes } = await req.json()

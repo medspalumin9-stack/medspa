@@ -3,6 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { format } from 'date-fns'
 import type { Metadata } from 'next'
+import { auth } from '@/lib/auth'
+import { requireAdminSection, type SessionUserWithAdmin } from '@/lib/admin-guard'
+import { userHasAdminSection, type AdminSection } from '@/lib/admin-sections'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import {
   BLISSORIA_BTN_ICON_ALT,
@@ -11,33 +14,38 @@ import {
 
 export const metadata: Metadata = { title: 'Admin | Lumin MedSpa' }
 
-const QUICK_LINKS = [
+const QUICK_LINKS: { title: string; description: string; href: string; section: AdminSection }[] = [
   {
     title: 'Bookings',
     description: 'Requests, contact details, status, and notes.',
     href: '/admin/bookings',
+    section: 'bookings',
   },
   {
     title: 'Clients',
     description: 'Registered clients, profiles, and history.',
     href: '/admin/clients',
+    section: 'clients',
   },
   {
     title: 'Services',
     description: 'Treatments, pricing, duration, and imagery.',
     href: '/admin/services',
+    section: 'services',
   },
   {
     title: 'Shop',
     description: 'Products on the public shop.',
     href: '/admin/products',
+    section: 'products',
   },
   {
     title: 'Users',
     description: 'Emails, passwords, and admin vs customer portal access.',
     href: '/admin/users',
+    section: 'users',
   },
-] as const
+]
 
 function statusPill(status: string) {
   if (status === 'CONFIRMED') return 'bg-emerald-50 text-emerald-800'
@@ -47,6 +55,10 @@ function statusPill(status: string) {
 }
 
 export default async function AdminOverviewPage() {
+  await requireAdminSection('overview')
+  const session = await auth()
+  const u = session?.user as SessionUserWithAdmin | undefined
+
   let stats = { bookings: 0, clients: 0, services: 0, products: 0, todayBookings: 0 }
   let recentBookings: Array<{
     id: string
@@ -83,13 +95,24 @@ export default async function AdminOverviewPage() {
     /* DB not connected */
   }
 
-  const statCards = [
-    { label: 'Today', value: stats.todayBookings, href: '/admin/bookings', sub: 'appointments' },
-    { label: 'All bookings', value: stats.bookings, href: '/admin/bookings', sub: 'active' },
-    { label: 'Clients', value: stats.clients, href: '/admin/clients', sub: 'accounts' },
-    { label: 'Services', value: stats.services, href: '/admin/services', sub: 'live' },
-    { label: 'Shop items', value: stats.products, href: '/admin/products', sub: 'in stock' },
+  const statCards: {
+    label: string
+    value: number
+    href: string
+    sub: string
+    section: AdminSection
+  }[] = [
+    { label: 'Today', value: stats.todayBookings, href: '/admin/bookings', sub: 'appointments', section: 'bookings' },
+    { label: 'All bookings', value: stats.bookings, href: '/admin/bookings', sub: 'active', section: 'bookings' },
+    { label: 'Clients', value: stats.clients, href: '/admin/clients', sub: 'accounts', section: 'clients' },
+    { label: 'Services', value: stats.services, href: '/admin/services', sub: 'live', section: 'services' },
+    { label: 'Shop items', value: stats.products, href: '/admin/products', sub: 'in stock', section: 'products' },
   ]
+
+  const statCardsVisible = statCards.filter((s) => userHasAdminSection(u, s.section))
+  const quickLinksVisible = QUICK_LINKS.filter((q) => userHasAdminSection(u, q.section))
+  const canBookings = userHasAdminSection(u, 'bookings')
+  const canServices = userHasAdminSection(u, 'services')
 
   return (
     <div className="bliss-admin-dash">
@@ -99,32 +122,36 @@ export default async function AdminOverviewPage() {
         description={format(new Date(), 'EEEE, MMMM d, yyyy')}
         actions={
           <>
-            <Link href="/admin/bookings" className="bliss-secondary-button">
-              <span className="bliss-secondary-button-bg" aria-hidden />
-              <span className="bliss-secondary-button-icon-wrap">
-                <Image
-                  src={BLISSORIA_BTN_ICON_PRIMARY}
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="bliss-secondary-button-icon"
-                />
-                <Image
-                  src={BLISSORIA_BTN_ICON_ALT}
-                  alt=""
-                  width={22}
-                  height={22}
-                  className="bliss-secondary-button-icon bliss-icon-hover"
-                />
-              </span>
-              <span className="bliss-secondary-button-text">Open bookings</span>
-            </Link>
-            <Link
-              href="/admin/services"
-              className="inline-flex items-center justify-center rounded-full border border-[#1e211e]/15 bg-white px-4 py-2.5 text-sm font-medium text-[#1e211e] transition-colors hover:bg-[#f4e6cd]/40"
-            >
-              Edit services
-            </Link>
+            {canBookings ? (
+              <Link href="/admin/bookings" className="bliss-secondary-button">
+                <span className="bliss-secondary-button-bg" aria-hidden />
+                <span className="bliss-secondary-button-icon-wrap">
+                  <Image
+                    src={BLISSORIA_BTN_ICON_PRIMARY}
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="bliss-secondary-button-icon"
+                  />
+                  <Image
+                    src={BLISSORIA_BTN_ICON_ALT}
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="bliss-secondary-button-icon bliss-icon-hover"
+                  />
+                </span>
+                <span className="bliss-secondary-button-text">Open bookings</span>
+              </Link>
+            ) : null}
+            {canServices ? (
+              <Link
+                href="/admin/services"
+                className="inline-flex items-center justify-center rounded-full border border-[#1e211e]/15 bg-white px-4 py-2.5 text-sm font-medium text-[#1e211e] transition-colors hover:bg-[#f4e6cd]/40"
+              >
+                Edit services
+              </Link>
+            ) : null}
           </>
         }
       />
@@ -134,12 +161,9 @@ export default async function AdminOverviewPage() {
           Overview statistics
         </h2>
         <div className="bliss-admin-stat-grid" role="list">
-          {statCards.map((s) => (
-            <div role="listitem" key={s.label}>
-              <Link
-                href={s.href}
-                className="service-card-wrap group/scard flex h-full !cursor-pointer flex-col no-underline"
-              >
+          {statCardsVisible.map((s) => {
+            const inner = (
+              <>
                 <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#edddc3]/60" aria-hidden>
                   <div className="absolute inset-0 bg-gradient-to-br from-[#f4e6cd] via-transparent to-[#6b5344]/12" />
                 </div>
@@ -160,9 +184,19 @@ export default async function AdminOverviewPage() {
                     </span>
                   </span>
                 </div>
-              </Link>
-            </div>
-          ))}
+              </>
+            )
+            return (
+              <div role="listitem" key={`${s.label}-${s.href}`}>
+                <Link
+                  href={s.href}
+                  className="service-card-wrap group/scard flex h-full !cursor-pointer flex-col no-underline"
+                >
+                  {inner}
+                </Link>
+              </div>
+            )
+          })}
         </div>
       </section>
 
@@ -179,7 +213,7 @@ export default async function AdminOverviewPage() {
           </p>
         </div>
         <div className="bliss-admin-quick-grid" role="list">
-          {QUICK_LINKS.map((item) => (
+          {quickLinksVisible.map((item) => (
             <div role="listitem" key={item.href}>
               <Link
                 href={item.href}
@@ -211,12 +245,16 @@ export default async function AdminOverviewPage() {
           <h2 id="admin-recent-heading" className="font-display text-lg font-normal text-[#1e211e]">
             Recent bookings
           </h2>
-          <Link
-            href="/admin/bookings"
-            className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6b5344] transition-colors hover:text-[#1e211e]"
-          >
-            View all
-          </Link>
+          {canBookings ? (
+            <Link
+              href="/admin/bookings"
+              className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6b5344] transition-colors hover:text-[#1e211e]"
+            >
+              View all
+            </Link>
+          ) : (
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#1e211e]/30">View all</span>
+          )}
         </div>
         {recentBookings.length === 0 ? (
           <p className="py-14 text-center text-sm text-[#1e211e]/45">

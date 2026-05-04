@@ -21,7 +21,7 @@ export default function FrontendLayout({
       <div className="page-wrapper">
         <LoadingScreen />
         <FrontendChrome>
-          <main className="main flex-1">{children}</main>
+          <main className="main flex-1 min-w-0">{children}</main>
         </FrontendChrome>
       </div>
     </SessionProviders>

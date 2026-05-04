@@ -34,6 +34,14 @@ model User {
   canAccessAdminPortal  Boolean  @default(false)
   /// When true, user may open /dashboard (customer portal).
   canAccessClientPortal Boolean  @default(true)
+  /// Granular /admin areas (only when canAccessAdminPortal is true).
+  canAdminOverview      Boolean  @default(true)
+  canAdminBookings      Boolean  @default(true)
+  canAdminClients       Boolean  @default(true)
+  canAdminServices      Boolean  @default(true)
+  canAdminProducts      Boolean  @default(true)
+  canAdminStaff         Boolean  @default(true)
+  canAdminUsers         Boolean  @default(true)
   createdAt             DateTime @default(now())
 
   profile      Profile?

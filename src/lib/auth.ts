@@ -50,6 +50,13 @@ export const authConfig: NextAuthConfig = {
           role: user.role,
           canAccessAdminPortal: user.canAccessAdminPortal,
           canAccessClientPortal: user.canAccessClientPortal,
+          canAdminOverview: user.canAdminOverview,
+          canAdminBookings: user.canAdminBookings,
+          canAdminClients: user.canAdminClients,
+          canAdminServices: user.canAdminServices,
+          canAdminProducts: user.canAdminProducts,
+          canAdminStaff: user.canAdminStaff,
+          canAdminUsers: user.canAdminUsers,
         }
       },
     }),
@@ -63,6 +70,13 @@ export const authConfig: NextAuthConfig = {
         token.role = (user as { role?: string }).role
         token.canAccessAdminPortal = (user as { canAccessAdminPortal?: boolean }).canAccessAdminPortal
         token.canAccessClientPortal = (user as { canAccessClientPortal?: boolean }).canAccessClientPortal
+        token.canAdminOverview = (user as { canAdminOverview?: boolean }).canAdminOverview
+        token.canAdminBookings = (user as { canAdminBookings?: boolean }).canAdminBookings
+        token.canAdminClients = (user as { canAdminClients?: boolean }).canAdminClients
+        token.canAdminServices = (user as { canAdminServices?: boolean }).canAdminServices
+        token.canAdminProducts = (user as { canAdminProducts?: boolean }).canAdminProducts
+        token.canAdminStaff = (user as { canAdminStaff?: boolean }).canAdminStaff
+        token.canAdminUsers = (user as { canAdminUsers?: boolean }).canAdminUsers
       }
       return token
     },
@@ -79,6 +93,13 @@ export const authConfig: NextAuthConfig = {
               role: true,
               canAccessAdminPortal: true,
               canAccessClientPortal: true,
+              canAdminOverview: true,
+              canAdminBookings: true,
+              canAdminClients: true,
+              canAdminServices: true,
+              canAdminProducts: true,
+              canAdminStaff: true,
+              canAdminUsers: true,
             },
           })
           if (row) {
@@ -88,6 +109,13 @@ export const authConfig: NextAuthConfig = {
             ;(session.user as { role?: string }).role = row.role
             ;(session.user as { canAccessAdminPortal?: boolean }).canAccessAdminPortal = row.canAccessAdminPortal
             ;(session.user as { canAccessClientPortal?: boolean }).canAccessClientPortal = row.canAccessClientPortal
+            ;(session.user as { canAdminOverview?: boolean }).canAdminOverview = row.canAdminOverview
+            ;(session.user as { canAdminBookings?: boolean }).canAdminBookings = row.canAdminBookings
+            ;(session.user as { canAdminClients?: boolean }).canAdminClients = row.canAdminClients
+            ;(session.user as { canAdminServices?: boolean }).canAdminServices = row.canAdminServices
+            ;(session.user as { canAdminProducts?: boolean }).canAdminProducts = row.canAdminProducts
+            ;(session.user as { canAdminStaff?: boolean }).canAdminStaff = row.canAdminStaff
+            ;(session.user as { canAdminUsers?: boolean }).canAdminUsers = row.canAdminUsers
           }
         } catch {
           if (session.user) {
@@ -97,6 +125,13 @@ export const authConfig: NextAuthConfig = {
               token.canAccessAdminPortal as boolean
             ;(session.user as { canAccessClientPortal?: boolean }).canAccessClientPortal =
               token.canAccessClientPortal as boolean
+            ;(session.user as { canAdminOverview?: boolean }).canAdminOverview = token.canAdminOverview as boolean
+            ;(session.user as { canAdminBookings?: boolean }).canAdminBookings = token.canAdminBookings as boolean
+            ;(session.user as { canAdminClients?: boolean }).canAdminClients = token.canAdminClients as boolean
+            ;(session.user as { canAdminServices?: boolean }).canAdminServices = token.canAdminServices as boolean
+            ;(session.user as { canAdminProducts?: boolean }).canAdminProducts = token.canAdminProducts as boolean
+            ;(session.user as { canAdminStaff?: boolean }).canAdminStaff = token.canAdminStaff as boolean
+            ;(session.user as { canAdminUsers?: boolean }).canAdminUsers = token.canAdminUsers as boolean
           }
         }
       }

@@ -154,6 +154,22 @@
   margin-left: auto;
   margin-right: auto;
   max-width: 72rem;
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+/* Admin nav: horizontal scroll on narrow viewports so all links stay reachable. */
+.sara-admin-root .bliss-nav-center {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.sara-admin-root .bliss-nav-menu-pill {
+  flex-wrap: nowrap;
 }
 
 /* Services-style cards: shorter image band than public listing (533/400). */
@@ -164,10 +180,28 @@
   margin-bottom: 16px;
 }
 
-.blissoria-services-scope .bliss-admin-dash .bliss-admin-quick-grid .service-card-image-wrap {
+.blissoria-services-scope .bliss-admin-dash .bliss-admin-user-cards .service-card-title {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+@media (max-width: 639px) {
+  .blissoria-services-scope .bliss-admin-dash .bliss-admin-user-cards .service-card-content-wrapper {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+.blissoria-services-scope .bliss-admin-dash .bliss-admin-user-cards .service-card-image-wrap {
   aspect-ratio: 4 / 3;
-  max-height: 140px;
+  max-height: 132px;
   margin-bottom: 20px;
+}
+
+@media (min-width: 640px) {
+  .blissoria-services-scope .bliss-admin-dash .bliss-admin-user-cards .service-card-image-wrap {
+    max-height: 148px;
+  }
 }
 
 .bliss-admin-table-wrap {

@@ -9,6 +9,8 @@
   --bliss-white: #ffffff;
   --bliss-almond: #edddc3;
   --bliss-lion: #bda06e;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .bliss-container {
@@ -16,14 +18,14 @@
   max-width: 1720px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
 }
 
 /* —— Navbar —— */
 .bliss-navbar {
   min-width: 100%;
-  padding-top: 20px;
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
   padding-bottom: 20px;
   position: fixed;
   top: 0;
@@ -105,6 +107,7 @@
   align-items: center;
   display: flex;
   gap: 16px;
+  min-width: 0;
 }
 
 .bliss-brand-logo {
@@ -133,6 +136,10 @@
 @media (min-width: 768px) {
   .bliss-nav-center {
     display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    justify-content: center;
   }
 }
 
@@ -148,6 +155,12 @@
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .bliss-nav-menu-pill {
+    flex-wrap: nowrap;
+  }
 }
 
 .bliss-nav-link {
@@ -334,6 +347,10 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  justify-content: center;
+  align-items: center;
   padding: 10px;
   background: none;
   border: none;
@@ -373,7 +390,7 @@
 }
 
 .bliss-mobile-inner {
-  padding: 20px 0 28px;
+  padding: 20px 0 max(28px, env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -386,6 +403,9 @@
   color: var(--bliss-dark);
   text-decoration: none;
   padding: 12px 16px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   border-radius: 12px;
   background: rgba(237, 221, 195, 0.45);
 }
@@ -767,7 +787,7 @@
 .bliss-footer.footer {
   background-color: var(--bliss-lion);
   padding-top: 300px;
-  padding-bottom: 60px;
+  padding-bottom: max(60px, calc(env(safe-area-inset-bottom, 0px) + 40px));
   position: relative;
 }
 
@@ -798,10 +818,12 @@
   margin-bottom: 100px;
   display: flex;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .bliss-footer .footer-info-wrap {
-  max-width: 315px;
+  max-width: min(315px, 100%);
+  min-width: 0;
 }
 
 .bliss-footer .footer-info-title-wrap h4.footer-info-title,
@@ -838,6 +860,7 @@
   transition: all 0.28s ease-in;
   display: flex;
   margin-top: 8px;
+  min-width: 0;
 }
 
 .bliss-footer .footer-info-link-wrap:hover {
@@ -848,6 +871,8 @@
   font-size: 18px;
   line-height: 28px;
   font-weight: 400;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .bliss-footer .footer-info-icon {
@@ -945,6 +970,7 @@
   justify-content: space-between;
   gap: 24px;
   align-items: center;
+  min-width: 0;
 }
 
 .bliss-footer .footer-link-wrap {
@@ -975,7 +1001,7 @@
 @media screen and (max-width: 991px) {
   .bliss-footer.footer {
     padding-top: 160px;
-    padding-bottom: 48px;
+    padding-bottom: max(48px, calc(env(safe-area-inset-bottom, 0px) + 32px));
   }
 
   .bliss-footer .footer-bg-desktop {
@@ -994,7 +1020,7 @@
 @media screen and (max-width: 767px) {
   .bliss-footer.footer {
     padding-top: 124px;
-    padding-bottom: 32px;
+    padding-bottom: max(32px, calc(env(safe-area-inset-bottom, 0px) + 24px));
   }
 
   .bliss-footer .footer-bg-tab {
