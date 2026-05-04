@@ -1,9 +1,12 @@
 'use client'
+
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Input } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/admin/ImageUpload'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
 
 type Service = {
   id: string
@@ -142,86 +145,93 @@ export default function AdminServicesPage() {
         </div>
       )}
 
-      <div className="bliss-admin-card overflow-hidden">
-        {services.length === 0 ? (
-          <p className="text-center text-[#1e211e]/40 py-14 text-sm">No services yet. Add one above.</p>
-        ) : (
-          <div className="bliss-admin-table-wrap">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead className="bg-[#f4e6cd]/35">
-                <tr>
-                  {['', 'Name', 'Duration', 'Price', 'Status', ''].map((h, i) => (
-                    <th
-                      key={i}
-                      className="text-left px-4 py-3 text-[10px] font-semibold text-[#1e211e]/50 uppercase tracking-[0.12em] sm:px-5"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {services.map(s => (
-                  <tr key={s.id} className="border-t border-[#1e211e]/8 transition-colors hover:bg-[#faf8f4]/90">
-                    <td className="px-4 py-3 sm:px-5">
-                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#edddc3]/50 relative flex-shrink-0">
+      {services.length === 0 ? (
+        <p className="text-center text-[#1e211e]/40 py-14 text-sm">No services yet. Add one above.</p>
+      ) : (
+        <div className="services-cards-wrap">
+          <div className="service-list-wrapper">
+            <div role="list" className="service-list">
+              {services.map((s, i) => {
+                const fallback = blissoriaServiceThumbForIndex(i)
+                const excerpt =
+                  s.description.length > 120 ? `${s.description.slice(0, 117).trim()}…` : s.description
+                return (
+                  <div key={s.id} role="listitem">
+                    <div className="service-card-wrap group/scard flex h-full flex-col !cursor-default">
+                      <div className="service-card-image-wrap">
                         {s.imageUrl ? (
-                          <img src={s.imageUrl} alt={s.name} className="w-full h-full object-cover" />
+                          <Image
+                            src={s.imageUrl}
+                            alt={s.name}
+                            fill
+                            sizes={BLISSORIA_CARD_SIZES}
+                            className="service-card-image"
+                          />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-[#bda06e]">✦</div>
+                          // eslint-disable-next-line @next/next/no-img-element -- Blissoria CDN responsive srcSet
+                          <img
+                            src={fallback.src}
+                            srcSet={fallback.srcSet}
+                            sizes={BLISSORIA_CARD_SIZES}
+                            alt={s.name}
+                            className="service-card-image"
+                          />
                         )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 font-medium text-[#1e211e] sm:px-5 sm:py-4">{s.name}</td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/60 sm:px-5 sm:py-4">{s.durationMinutes} min</td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-5 sm:py-4">${s.price}</td>
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
-                          s.isActive
-                            ? 'bg-[#8FA896]/20 text-[#3d5c45]'
-                            : 'bg-[#e8e4dc] text-[#1e211e]/50'
-                        }`}
-                      >
-                        {s.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right whitespace-nowrap sm:px-5 sm:py-4">
-                      <button
-                        type="button"
-                        onClick={() => { setForm(s); setEditing(true) }}
-                        className="text-xs text-[#6b5344] hover:underline mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deactivate(s.id)}
-                        className="text-xs text-[#1e211e]/35 hover:text-amber-700 mr-3"
-                      >
-                        Deactivate
-                      </button>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!confirm('Permanently delete this service? This only works if no appointments reference it.')) return
-                          const r = await fetch(`/api/admin/services?id=${encodeURIComponent(s.id)}&hard=1`, { method: 'DELETE' })
-                          const j = await r.json().catch(() => ({}))
-                          if (!r.ok) { alert(typeof j.error === 'string' ? j.error : 'Could not delete service.'); return }
-                          await load()
-                        }}
-                        className="text-xs text-red-500/80 hover:text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className="service-card-content-wrapper">
+                        <p className="service-card-kicker">{s.durationMinutes} minutes · {s.isActive ? 'Live' : 'Hidden'}</p>
+                        <div className="service-card-title-wrap">
+                          <div className="service-card-title">{s.name}</div>
+                        </div>
+                        <div className="service-card-text-wrap">
+                          <p className="service-card-text">{excerpt || '—'}</p>
+                        </div>
+                        <div className="service-card-price">${s.price}</div>
+                        <div className="mt-1 flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => { setForm(s); setEditing(true) }}
+                            className="tertiary-button"
+                          >
+                            <span className="tertiary-button-text-wrap">
+                              <span className="tertiary-button-slide">
+                                <span className="tertiary-button-text">Edit service</span>
+                                <span className="tertiary-button-text">Edit service</span>
+                              </span>
+                            </span>
+                          </button>
+                          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => deactivate(s.id)}
+                              className="text-xs text-[#1e211e]/35 transition-colors hover:text-amber-800"
+                            >
+                              Deactivate
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!confirm('Permanently delete this service? This only works if no appointments reference it.')) return
+                                const r = await fetch(`/api/admin/services?id=${encodeURIComponent(s.id)}&hard=1`, { method: 'DELETE' })
+                                const j = await r.json().catch(() => ({}))
+                                if (!r.ok) { alert(typeof j.error === 'string' ? j.error : 'Could not delete service.'); return }
+                                await load()
+                              }}
+                              className="text-xs text-red-500/80 transition-colors hover:text-red-600"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

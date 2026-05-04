@@ -24,13 +24,17 @@ enum ReminderChannel {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  fullName     String
-  phone        String?
-  passwordHash String
-  role         Role     @default(CLIENT)
-  createdAt    DateTime @default(now())
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  fullName              String
+  phone                 String?
+  passwordHash          String
+  role                  Role     @default(CLIENT)
+  /// When true, user may open /admin (staff console).
+  canAccessAdminPortal  Boolean  @default(false)
+  /// When true, user may open /dashboard (customer portal).
+  canAccessClientPortal Boolean  @default(true)
+  createdAt             DateTime @default(now())
 
   profile      Profile?
   appointments Appointment[]

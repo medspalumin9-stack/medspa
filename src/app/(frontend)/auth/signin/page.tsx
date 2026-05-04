@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { postCredentialsLoginPath } from '@/lib/post-login-redirect'
+
+type AuthMode = 'existing' | 'new'
 
 /* ─── Arrow SVG ───────────────────────────────────────────────────────────── */
 function Arrow() {
@@ -44,8 +47,8 @@ function Field({
   )
 }
 
-/* ─── Sign-In card ────────────────────────────────────────────────────────── */
-function SignInCard() {
+/* ─── Sign-In panel (no outer card — lives inside unified card) ──────────── */
+function SignInPanel() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -62,13 +65,16 @@ function SignInCard() {
       return
     }
     const session = await getSession()
-    const role = (session?.user as { role?: string } | undefined)?.role
-    router.push(role === 'ADMIN' ? '/admin' : '/dashboard')
+    const u = session?.user as {
+      canAccessAdminPortal?: boolean
+      canAccessClientPortal?: boolean
+    } | undefined
+    router.push(postCredentialsLoginPath(u ?? {}))
     router.refresh()
   }
 
   return (
-    <div className="sara-auth-card">
+    <>
       <div className="sara-auth-mark">✦</div>
       <p className="sara-kicker">Welcome back</p>
       <h1 className="sara-h2" style={{ marginBottom: '6px' }}>Sign in</h1>
@@ -94,12 +100,12 @@ function SignInCard() {
         Forgot your password?{' '}
         <Link href="/auth/signin" style={{ color: 'var(--sara-accent)', textDecoration: 'underline' }}>Reset it</Link>
       </p>
-    </div>
+    </>
   )
 }
 
-/* ─── Register card ───────────────────────────────────────────────────────── */
-function RegisterCard() {
+/* ─── Register panel ──────────────────────────────────────────────────────── */
+function RegisterPanel() {
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '', confirm: '' })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -120,12 +126,17 @@ function RegisterCard() {
     if (!res.ok) { setError(data?.error || 'Registration failed.'); setLoading(false); return }
     setSuccess(true)
     await signIn('credentials', { email: form.email, password: form.password, redirect: false })
-    router.push('/dashboard')
+    const session = await getSession()
+    const u = session?.user as {
+      canAccessAdminPortal?: boolean
+      canAccessClientPortal?: boolean
+    } | undefined
+    router.push(postCredentialsLoginPath(u ?? {}))
     router.refresh()
   }
 
   return (
-    <div className="sara-auth-card">
+    <>
       <div className="sara-auth-mark" style={{ color: 'var(--sara-accent)', borderColor: 'rgba(124,68,58,0.15)' }}>✧</div>
       <p className="sara-kicker">New here?</p>
       <h2 className="sara-h2" style={{ marginBottom: '6px' }}>Join Lumin</h2>
@@ -155,17 +166,42 @@ function RegisterCard() {
           {loading ? 'Creating account…' : 'Create account'}
         </button>
       </form>
-    </div>
+    </>
   )
 }
 
 /* ─── Page ────────────────────────────────────────────────────────────────── */
 export default function SignInPage() {
+  const [mode, setMode] = useState<AuthMode>('existing')
+
   return (
     <div className="sara-auth-bg">
-      <div className="sara-auth-wrap">
-        <SignInCard />
-        <RegisterCard />
+      <div className="sara-auth-wrap sara-auth-wrap--single">
+        <div className="sara-auth-card">
+          <div className="sara-auth-segment" role="group" aria-label="Account">
+            <button
+              type="button"
+              aria-pressed={mode === 'existing'}
+              onClick={() => setMode('existing')}
+            >
+              Existing account
+            </button>
+            <button
+              type="button"
+              aria-pressed={mode === 'new'}
+              onClick={() => setMode('new')}
+            >
+              New account
+            </button>
+          </div>
+
+          <div id="auth-panel-existing" hidden={mode !== 'existing'}>
+            <SignInPanel />
+          </div>
+          <div id="auth-panel-new" hidden={mode !== 'new'}>
+            <RegisterPanel />
+          </div>
+        </div>
       </div>
     </div>
   )

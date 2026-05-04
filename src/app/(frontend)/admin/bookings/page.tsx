@@ -1,7 +1,9 @@
 'use client'
+
 import { Fragment, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 
 type Appointment = {
   id: string
@@ -34,15 +36,15 @@ function tabStatuses(tab: Tab): string[] {
 
 function statusPill(status: string) {
   switch (status) {
-    case 'CONFIRMED':  return 'sara-pill sara-pill--green'
-    case 'CANCELLED':  return 'sara-pill sara-pill--red'
-    case 'COMPLETED':  return 'sara-pill sara-pill--grey'
-    default:           return 'sara-pill sara-pill--amber'
+    case 'CONFIRMED': return 'bg-emerald-50 text-emerald-800'
+    case 'CANCELLED': return 'bg-red-50 text-red-700'
+    case 'COMPLETED': return 'bg-[#e8e4dc] text-[#1e211e]/65'
+    default: return 'bg-[#f4e6cd] text-[#6b5344]'
   }
 }
 
-const DT_LABEL = 'sara-label'
-const DT_VALUE = 'text-sm text-[var(--sara-dark)]'
+const DT_LABEL = 'block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1e211e]/45 mb-1'
+const DT_VALUE = 'text-sm text-[#1e211e]'
 
 export default function AdminBookingsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -60,13 +62,20 @@ export default function AdminBookingsPage() {
     return list
   }
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      void load()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   useEffect(() => {
-    if (expandedId) {
+    if (!expandedId) return
+    const frame = requestAnimationFrame(() => {
       const appt = appointments.find((a) => a.id === expandedId)
       setNoteDraft(appt?.notes ?? '')
-    }
+    })
+    return () => cancelAnimationFrame(frame)
   }, [expandedId, appointments])
 
   const updateStatus = async (id: string, status: string) => {
@@ -91,10 +100,10 @@ export default function AdminBookingsPage() {
   }
 
   const today = format(new Date(), 'yyyy-MM-dd')
-  const totalBookings  = appointments.length
-  const todaysVisits   = appointments.filter((a) => format(new Date(a.startTime), 'yyyy-MM-dd') === today).length
-  const confirmed      = appointments.filter((a) => a.status === 'CONFIRMED').length
-  const cancelled      = appointments.filter((a) => a.status === 'CANCELLED').length
+  const totalBookings = appointments.length
+  const todaysVisits = appointments.filter((a) => format(new Date(a.startTime), 'yyyy-MM-dd') === today).length
+  const confirmed = appointments.filter((a) => a.status === 'CONFIRMED').length
+  const cancelled = appointments.filter((a) => a.status === 'CANCELLED').length
 
   const displayed =
     filter !== 'ALL'
@@ -104,223 +113,240 @@ export default function AdminBookingsPage() {
   const expandedAppt = appointments.find((a) => a.id === expandedId) ?? null
   const toggleRow = (id: string) => setExpandedId((prev) => (prev === id ? null : id))
 
+  const statCards = [
+    { label: 'Total bookings', value: totalBookings },
+    { label: "Today's visits", value: todaysVisits },
+    { label: 'Confirmed', value: confirmed },
+    { label: 'Cancelled', value: cancelled },
+  ]
+
   return (
-    <div className="sara-admin-page">
-      <div className="sara-container">
+    <div className="bliss-admin-dash">
+      <AdminPageHeader
+        eyebrow="Operations"
+        title="Bookings"
+        description={
+          <>
+            Guest contact details and internal notes. Link clients from the{' '}
+            <Link href="/admin/clients" className="font-medium text-[#6b5344] underline-offset-2 hover:underline">
+              Clients
+            </Link>{' '}
+            page.
+          </>
+        }
+      />
 
-        {/* ── Page header ────────────────────────────────────────────────── */}
-        <div className="sara-page-header">
-          <div>
-            <p className="sara-kicker">Operations</p>
-            <h1 className="sara-h2">Bookings</h1>
-            <p style={{ fontSize: '15px', color: 'rgba(30,27,24,0.55)', marginTop: '6px' }}>
-              Guest contact details and internal notes. Link clients from the{' '}
-              <Link href="/admin/clients" style={{ color: 'var(--sara-accent)', textDecoration: 'underline' }}>Clients</Link>{' '}
-              page.
-            </p>
-          </div>
-          {/* Status filter pills */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {['ALL', ...STATUSES].map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setFilter(s)}
-                className={filter === s ? 'sara-pill sara-pill--dark' : 'sara-pill sara-pill--grey'}
-                style={{ cursor: 'pointer', border: 'none', padding: '5px 14px', fontSize: '11px' }}
-              >
-                {s.toLowerCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Stats row ──────────────────────────────────────────────────── */}
-        <div className="sara-stats-row">
-          {[
-            { label: 'Total bookings', value: totalBookings },
-            { label: "Today's visits",  value: todaysVisits },
-            { label: 'Confirmed',       value: confirmed },
-            { label: 'Cancelled',       value: cancelled },
-          ].map(({ label, value }) => (
-            <div key={label} className="sara-stat-card">
-              <p className="sara-stat-label">{label}</p>
-              <p className="sara-stat-value">{value}</p>
+      <section aria-labelledby="bookings-stats-heading" className="mb-10">
+        <h2 id="bookings-stats-heading" className="sr-only">Booking statistics</h2>
+        <div className="bliss-admin-stat-grid" role="list">
+          {statCards.map((s) => (
+            <div role="listitem" key={s.label}>
+              <div className="service-card-wrap group/scard flex h-full flex-col !cursor-default">
+                <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#edddc3]/50" aria-hidden>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#faf8f4] to-[#6b5344]/10" />
+                </div>
+                <div className="service-card-content-wrapper !py-4">
+                  <p className="font-display text-[1.85rem] leading-none tracking-tight text-[#1e211e] tabular-nums md:text-[2rem]">
+                    {s.value}
+                  </p>
+                  <p className="service-card-kicker mt-auto !text-[11px] !font-semibold !uppercase !tracking-[0.12em]">
+                    {s.label}
+                  </p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
+      </section>
 
-        {/* ── Tab bar ────────────────────────────────────────────────────── */}
-        <div className="sara-tab-bar">
-          {TABS.map(({ key, label }) => (
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {['ALL', ...STATUSES].map((st) => (
             <button
-              key={key}
+              key={st}
               type="button"
-              onClick={() => { setActiveTab(key); setFilter('ALL'); setExpandedId(null) }}
-              className={`sara-tab ${activeTab === key && filter === 'ALL' ? 'is-active' : ''}`}
+              onClick={() => setFilter(st)}
+              className={
+                filter === st
+                  ? 'rounded-full bg-[#1e211e] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#f4e6cd]'
+                  : 'rounded-full border border-[#1e211e]/10 bg-white px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-wide text-[#1e211e]/55 transition-colors hover:border-[#1e211e]/20 hover:text-[#1e211e]'
+              }
             >
-              {label}
-              <span style={{
-                marginLeft: '6px', fontSize: '10px', fontWeight: 700,
-                background: 'rgba(30,27,24,0.07)', borderRadius: '10px', padding: '1px 6px',
-              }}>
-                {appointments.filter((a) => tabStatuses(key).includes(a.status)).length}
-              </span>
+              {st.toLowerCase()}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* ── Table ──────────────────────────────────────────────────────── */}
-        <div className="sara-table-wrap">
-          {displayed.length === 0 ? (
-            <div className="sara-empty">No bookings in this view.</div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table className="sara-table" style={{ minWidth: '760px' }}>
-                <thead>
-                  <tr>
-                    {['Client', 'Email', 'Service', 'When', 'Staff', 'Status', ''].map((h) => (
-                      <th key={h}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayed.map((a) => (
-                    <Fragment key={a.id}>
-                      {/* Main row */}
-                      <tr
-                        style={{ background: expandedId === a.id ? 'var(--sara-bg)' : undefined }}
-                        onClick={() => toggleRow(a.id)}
-                      >
-                        <td>
-                          <p style={{ fontWeight: 500 }}>{a.clientName}</p>
-                          <p style={{ fontSize: '11px', color: 'rgba(30,27,24,0.45)', marginTop: '2px' }}>{a.clientPhone}</p>
-                        </td>
-                        <td>
-                          <a
-                            href={`mailto:${a.clientEmail}`}
-                            style={{ color: 'var(--sara-accent)', fontSize: '12px' }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {a.clientEmail}
-                          </a>
-                        </td>
-                        <td style={{ color: 'rgba(30,27,24,0.70)' }}>{a.service?.name}</td>
-                        <td style={{ fontSize: '12px', color: 'rgba(30,27,24,0.65)', whiteSpace: 'nowrap' }}>
-                          {format(new Date(a.startTime), 'MMM d, yyyy')}
-                          <br />
-                          <span style={{ color: 'rgba(30,27,24,0.45)' }}>
-                            {format(new Date(a.startTime), 'h:mm a')} – {format(new Date(a.endTime), 'h:mm a')}
-                          </span>
-                        </td>
-                        <td style={{ color: 'rgba(30,27,24,0.70)' }}>{a.staff?.name}</td>
-                        <td><span className={statusPill(a.status)}>{a.status.toLowerCase()}</span></td>
-                        <td style={{ textAlign: 'right' }}>
-                          <span
-                            style={{
-                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                              width: 24, height: 24, borderRadius: '50%',
-                              background: expandedId === a.id ? 'var(--sara-dark)' : 'rgba(30,27,24,0.07)',
-                              color: expandedId === a.id ? 'var(--sara-bg)' : 'rgba(30,27,24,0.50)',
-                              transition: 'all 0.2s',
-                            }}
-                            aria-label={expandedId === a.id ? 'Collapse' : 'Expand'}
-                          >
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
-                              style={{ transform: expandedId === a.id ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>
-                              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </span>
-                        </td>
-                      </tr>
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-[#1e211e]/10 pb-4">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => { setActiveTab(key); setFilter('ALL'); setExpandedId(null) }}
+            className={
+              activeTab === key && filter === 'ALL'
+                ? 'rounded-full bg-[#f4e6cd] px-4 py-2 text-sm font-medium text-[#1e211e] ring-1 ring-[#1e211e]/10'
+                : 'rounded-full px-4 py-2 text-sm font-medium text-[#1e211e]/50 transition-colors hover:text-[#1e211e]'
+            }
+          >
+            {label}
+            <span className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#1e211e]/[0.06] px-1.5 py-0.5 text-[10px] font-bold text-[#1e211e]/70">
+              {appointments.filter((a) => tabStatuses(key).includes(a.status)).length}
+            </span>
+          </button>
+        ))}
+      </div>
 
-                      {/* Detail panel */}
-                      {expandedId === a.id && expandedAppt && (
-                        <tr>
-                          <td colSpan={7} className="sara-accordion-td">
-                            <div style={{ padding: '24px 16px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: '32px' }}>
-                              {/* Booking details */}
-                              <div>
-                                <p className="sara-kicker" style={{ marginBottom: '16px' }}>
-                                  Booking #{expandedAppt.id.slice(0, 8)}…
-                                </p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 24px' }}>
-                                  {[
-                                    { label: 'Guest', value: expandedAppt.clientName },
-                                    { label: 'Phone', value: <a href={`tel:${expandedAppt.clientPhone}`} style={{ color: 'var(--sara-accent)' }}>{expandedAppt.clientPhone}</a> },
-                                    { label: 'Email', value: <a href={`mailto:${expandedAppt.clientEmail}`} style={{ color: 'var(--sara-accent)', wordBreak: 'break-all' }}>{expandedAppt.clientEmail}</a> },
-                                    { label: 'Service', value: expandedAppt.service?.name ?? '—' },
-                                    { label: 'Staff', value: expandedAppt.staff?.name ?? '—' },
-                                    {
-                                      label: 'Schedule',
-                                      value: (
-                                        <>
-                                          {format(new Date(expandedAppt.startTime), 'EEE, MMM d')}
-                                          <br />
-                                          <span style={{ color: 'rgba(30,27,24,0.50)', fontSize: '11px' }}>
-                                            {format(new Date(expandedAppt.startTime), 'h:mm a')} – {format(new Date(expandedAppt.endTime), 'h:mm a')}
-                                          </span>
-                                        </>
-                                      ),
-                                    },
-                                  ].map(({ label, value }) => (
-                                    <div key={label}>
-                                      <span className={DT_LABEL}>{label}</span>
-                                      <span className={DT_VALUE} style={{ fontWeight: label === 'Guest' ? 500 : 400 }}>{value}</span>
-                                    </div>
-                                  ))}
-                                  <div>
-                                    <span className={DT_LABEL}>Status</span>
-                                    <select
-                                      value={expandedAppt.status}
-                                      onChange={(e) => { e.stopPropagation(); void updateStatus(expandedAppt.id, e.target.value) }}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="sara-input sara-select"
-                                      style={{ padding: '6px 32px 6px 10px', fontSize: '12px', borderRadius: '8px' }}
-                                    >
-                                      {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>)}
-                                    </select>
+      <div className="bliss-admin-card overflow-hidden">
+        {displayed.length === 0 ? (
+          <p className="py-14 text-center text-sm text-[#1e211e]/45">No bookings in this view.</p>
+        ) : (
+          <div className="bliss-admin-table-wrap">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="bg-[#f4e6cd]/35">
+                <tr>
+                  {['Client', 'Email', 'Service', 'When', 'Staff', 'Status', ''].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1e211e]/50 sm:px-6"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {displayed.map((a) => (
+                  <Fragment key={a.id}>
+                    <tr
+                      className={`cursor-pointer border-t border-[#1e211e]/8 transition-colors hover:bg-[#faf8f4]/90 ${expandedId === a.id ? 'bg-[#faf8f4]/90' : ''}`}
+                      onClick={() => toggleRow(a.id)}
+                    >
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
+                        <p className="font-medium text-[#1e211e]">{a.clientName}</p>
+                        <p className="mt-0.5 text-[11px] text-[#1e211e]/45">{a.clientPhone}</p>
+                      </td>
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
+                        <a
+                          href={`mailto:${a.clientEmail}`}
+                          className="text-xs text-[#6b5344] hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {a.clientEmail}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">{a.service?.name}</td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">
+                        {format(new Date(a.startTime), 'MMM d, yyyy')}
+                        <br />
+                        <span className="text-[#1e211e]/45">
+                          {format(new Date(a.startTime), 'h:mm a')} – {format(new Date(a.endTime), 'h:mm a')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">{a.staff?.name}</td>
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusPill(a.status)}`}>
+                          {a.status.toLowerCase()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right sm:px-6 sm:py-4">
+                        <span
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[#1e211e]/50 transition-all"
+                          style={{
+                            background: expandedId === a.id ? '#1e211e' : 'rgba(30,33,30,0.07)',
+                            color: expandedId === a.id ? '#f4e6cd' : undefined,
+                          }}
+                          aria-label={expandedId === a.id ? 'Collapse' : 'Expand'}
+                        >
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: expandedId === a.id ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>
+                            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
+                      </td>
+                    </tr>
+
+                    {expandedId === a.id && expandedAppt && (
+                      <tr>
+                        <td colSpan={7} className="border-t border-[#1e211e]/8 bg-[#faf8f4]/50 px-0">
+                          <div className="grid gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_280px]">
+                            <div>
+                              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b5344]">
+                                Booking #{expandedAppt.id.slice(0, 8)}…
+                              </p>
+                              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                  { label: 'Guest', value: expandedAppt.clientName },
+                                  { label: 'Phone', value: <a href={`tel:${expandedAppt.clientPhone}`} className="text-[#6b5344] hover:underline">{expandedAppt.clientPhone}</a> },
+                                  { label: 'Email', value: <a href={`mailto:${expandedAppt.clientEmail}`} className="break-all text-[#6b5344] hover:underline">{expandedAppt.clientEmail}</a> },
+                                  { label: 'Service', value: expandedAppt.service?.name ?? '—' },
+                                  { label: 'Staff', value: expandedAppt.staff?.name ?? '—' },
+                                  {
+                                    label: 'Schedule',
+                                    value: (
+                                      <>
+                                        {format(new Date(expandedAppt.startTime), 'EEE, MMM d')}
+                                        <br />
+                                        <span className="text-[11px] text-[#1e211e]/50">
+                                          {format(new Date(expandedAppt.startTime), 'h:mm a')} – {format(new Date(expandedAppt.endTime), 'h:mm a')}
+                                        </span>
+                                      </>
+                                    ),
+                                  },
+                                ].map(({ label, value }) => (
+                                  <div key={label}>
+                                    <span className={DT_LABEL}>{label}</span>
+                                    <span className={`${DT_VALUE} ${label === 'Guest' ? 'font-medium' : ''}`}>{value}</span>
                                   </div>
+                                ))}
+                                <div>
+                                  <span className={DT_LABEL}>Status</span>
+                                  <select
+                                    value={expandedAppt.status}
+                                    onChange={(e) => { e.stopPropagation(); void updateStatus(expandedAppt.id, e.target.value) }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="mt-1 w-full max-w-[200px] rounded-lg border border-[#1e211e]/12 bg-white px-3 py-2 text-xs text-[#1e211e] focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20"
+                                  >
+                                    {STATUSES.map((st) => (
+                                      <option key={st} value={st}>{st.charAt(0) + st.slice(1).toLowerCase()}</option>
+                                    ))}
+                                  </select>
                                 </div>
                               </div>
-
-                              {/* Notes editor */}
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <label htmlFor={`notes-${expandedAppt.id}`} className={DT_LABEL}>
-                                  Internal notes
-                                </label>
-                                <textarea
-                                  id={`notes-${expandedAppt.id}`}
-                                  value={noteDraft}
-                                  onChange={(e) => setNoteDraft(e.target.value)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  rows={5}
-                                  placeholder="Private notes for staff (not shown to clients)…"
-                                  className="sara-input"
-                                  style={{ borderRadius: '12px', resize: 'vertical', minHeight: '100px', fontSize: '13px' }}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={(e) => { e.stopPropagation(); void saveNotes() }}
-                                  disabled={savingNotes}
-                                  className="sara-btn sara-btn--dark"
-                                  style={{ justifyContent: 'center', padding: '10px 20px', fontSize: '12px' }}
-                                >
-                                  {savingNotes ? 'Saving…' : 'Save notes'}
-                                </button>
-                              </div>
                             </div>
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
 
+                            <div className="flex flex-col gap-2">
+                              <label htmlFor={`notes-${expandedAppt.id}`} className={DT_LABEL}>
+                                Internal notes
+                              </label>
+                              <textarea
+                                id={`notes-${expandedAppt.id}`}
+                                value={noteDraft}
+                                onChange={(e) => setNoteDraft(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                rows={5}
+                                placeholder="Private notes for staff (not shown to clients)…"
+                                className="min-h-[100px] w-full resize-y rounded-xl border border-[#1e211e]/12 bg-white px-3 py-2.5 text-sm text-[#1e211e] focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); void saveNotes() }}
+                                disabled={savingNotes}
+                                className="inline-flex items-center justify-center rounded-full bg-[#1e211e] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-[#f4e6cd] transition-opacity hover:opacity-90 disabled:opacity-50"
+                              >
+                                {savingNotes ? 'Saving…' : 'Save notes'}
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1,9 +1,12 @@
 'use client'
+
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Input } from '@/components/ui/Input'
 import { ImageUpload } from '@/components/admin/ImageUpload'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
 
 type Product = {
   id: string
@@ -142,61 +145,80 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {products.length === 0 && (
-          <p className="text-[#1e211e]/40 text-sm py-14 col-span-3 text-center">
-            No products yet. Add one above.
-          </p>
-        )}
-        {products.map(p => (
-          <div key={p.id} className="bliss-admin-card overflow-hidden">
-            <div className="aspect-video bg-[#edddc3]/30 relative">
-              {p.imageUrl && (
-                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-              )}
-              {!p.imageUrl && (
-                <div className="w-full h-full flex items-center justify-center text-2xl text-[#bda06e]/40">✦</div>
-              )}
-            </div>
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-medium text-[#1e211e] truncate">{p.name}</p>
-                  {p.category && (
-                    <p className="text-xs text-[#1e211e]/45 capitalize mt-0.5">{p.category}</p>
-                  )}
-                </div>
-                <p className="text-sm font-semibold text-[#1e211e] shrink-0">${p.price}</p>
-              </div>
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#1e211e]/8">
-                <span
-                  className={`text-[10px] font-semibold uppercase tracking-[0.1em] ${
-                    p.isAvailable ? 'text-[#3d5c45]' : 'text-[#1e211e]/35'
-                  }`}
-                >
-                  {p.isAvailable ? 'Live' : 'Hidden'}
-                </span>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setForm(p); setEditing(true) }}
-                    className="text-xs text-[#6b5344] hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => remove(p.id)}
-                    className="text-xs text-[#1e211e]/30 hover:text-red-500"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+      {products.length === 0 ? (
+        <p className="text-[#1e211e]/40 text-sm py-14 text-center">No products yet. Add one above.</p>
+      ) : (
+        <div className="services-cards-wrap">
+          <div className="service-list-wrapper">
+            <div role="list" className="service-list">
+              {products.map((p, i) => {
+                const fallback = blissoriaServiceThumbForIndex(i + 2)
+                const excerpt =
+                  p.description.length > 100 ? `${p.description.slice(0, 97).trim()}…` : p.description
+                return (
+                  <div key={p.id} role="listitem">
+                    <div className="service-card-wrap group/scard flex h-full flex-col !cursor-default">
+                      <div className="service-card-image-wrap">
+                        {p.imageUrl ? (
+                          <Image
+                            src={p.imageUrl}
+                            alt={p.name}
+                            fill
+                            sizes={BLISSORIA_CARD_SIZES}
+                            className="service-card-image"
+                          />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element -- Blissoria CDN responsive srcSet
+                          <img
+                            src={fallback.src}
+                            srcSet={fallback.srcSet}
+                            sizes={BLISSORIA_CARD_SIZES}
+                            alt={p.name}
+                            className="service-card-image"
+                          />
+                        )}
+                      </div>
+                      <div className="service-card-content-wrapper">
+                        <p className="service-card-kicker">
+                          {p.category ? `${p.category} · ` : ''}{p.isAvailable ? 'Live in shop' : 'Hidden'}
+                        </p>
+                        <div className="service-card-title-wrap">
+                          <div className="service-card-title">{p.name}</div>
+                        </div>
+                        <div className="service-card-text-wrap">
+                          <p className="service-card-text">{excerpt || '—'}</p>
+                        </div>
+                        <div className="service-card-price">${p.price}</div>
+                        <div className="mt-1 flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => { setForm(p); setEditing(true) }}
+                            className="tertiary-button"
+                          >
+                            <span className="tertiary-button-text-wrap">
+                              <span className="tertiary-button-slide">
+                                <span className="tertiary-button-text">Edit product</span>
+                                <span className="tertiary-button-text">Edit product</span>
+                              </span>
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => remove(p.id)}
+                            className="text-center text-xs text-[#1e211e]/35 transition-colors hover:text-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

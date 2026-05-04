@@ -119,9 +119,7 @@ export function Navbar() {
     ['Services', '/services'],
     ['Shop', '/shop'],
   ]
-  const links: [string, string][] = session
-    ? linkTuples.filter(([, href]) => href !== '/shop')
-    : linkTuples
+  const links: [string, string][] = linkTuples
 
   return (
     <nav

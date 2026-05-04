@@ -32,6 +32,11 @@ const QUICK_LINKS = [
     description: 'Products on the public shop.',
     href: '/admin/products',
   },
+  {
+    title: 'Users',
+    description: 'Emails, passwords, and admin vs customer portal access.',
+    href: '/admin/users',
+  },
 ] as const
 
 function statusPill(status: string) {
@@ -60,7 +65,7 @@ export default async function AdminOverviewPage() {
 
     const [bookings, clients, services, products, todayBookings, recent] = await Promise.all([
       prisma.appointment.count({ where: { status: { notIn: ['CANCELLED'] } } }),
-      prisma.user.count({ where: { role: 'CLIENT' } }),
+      prisma.user.count({ where: { role: 'CLIENT', canAccessClientPortal: true } }),
       prisma.service.count({ where: { isActive: true } }),
       prisma.product.count({ where: { isAvailable: true } }),
       prisma.appointment.count({
@@ -135,6 +140,9 @@ export default async function AdminOverviewPage() {
                 href={s.href}
                 className="service-card-wrap group/scard flex h-full !cursor-pointer flex-col no-underline"
               >
+                <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#edddc3]/60" aria-hidden>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#f4e6cd] via-transparent to-[#6b5344]/12" />
+                </div>
                 <div className="service-card-content-wrapper flex min-h-[9rem] flex-1 flex-col !py-5">
                   <p className="font-display text-[1.85rem] leading-none tracking-tight text-[#1e211e] tabular-nums md:text-[2rem]">
                     {s.value}
@@ -177,6 +185,9 @@ export default async function AdminOverviewPage() {
                 href={item.href}
                 className="service-card-wrap group/scard flex h-full min-h-[12rem] flex-col justify-between !cursor-pointer no-underline"
               >
+                <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#1e211e]/[0.06]" aria-hidden>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#edddc3]/90 via-[#f4e6cd]/40 to-[#faf8f4]" />
+                </div>
                 <div className="service-card-content-wrapper">
                   <h3 className="service-card-title !text-[1.35rem] md:!text-[1.5rem]">{item.title}</h3>
                   <p className="service-card-text mt-2 text-[15px] opacity-85">{item.description}</p>

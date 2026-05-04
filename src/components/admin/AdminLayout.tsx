@@ -12,6 +12,7 @@ const NAV: [string, string][] = [
   ['Services',  '/admin/services'],
   ['Shop',      '/admin/products'],
   ['Staff',     '/admin/staff'],
+  ['Users',     '/admin/users'],
 ]
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -107,7 +108,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <main className="sara-admin-main">{children}</main>
+      <main className="sara-admin-main blissoria-services-scope">{children}</main>
     </div>
   )
 }

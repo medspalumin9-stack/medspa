@@ -46,6 +46,9 @@ export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.email) redirect('/auth/signin?callbackUrl=/dashboard')
 
+  const portal = session.user as { canAccessClientPortal?: boolean }
+  if (!portal.canAccessClientPortal) redirect('/auth/signin?error=no-client-portal')
+
   let user: DashboardUser | null = null
   let appointments: AppointmentWithRelations[] = []
 
@@ -337,14 +340,11 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Footer CTA */}
-        <div style={{ borderTop: '1px solid var(--sara-border)', paddingTop: '40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <p style={{ fontSize: '14px', color: 'rgba(30,27,24,0.50)' }}>
+        {/* Closing note */}
+        <div style={{ borderTop: '1px solid var(--sara-border)', paddingTop: '40px' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(30,27,24,0.50)', maxWidth: '36rem' }}>
             Questions about your plan? We&apos;re here to help before or after your visit.
           </p>
-          <Link href="/contact" className="sara-btn sara-btn--ghost" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-            Contact the studio
-          </Link>
         </div>
       </div>
     </div>

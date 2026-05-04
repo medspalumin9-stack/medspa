@@ -12,7 +12,7 @@ type Props = {
 
 export async function AdminCatalogBar({ adminHref, ctaLabel, message }: Props) {
   const session = await auth()
-  if ((session?.user as { role?: string } | undefined)?.role !== 'ADMIN') return null
+  if ((session?.user as { canAccessAdminPortal?: boolean } | undefined)?.canAccessAdminPortal !== true) return null
 
   return (
     <div className="bliss-container relative z-20">

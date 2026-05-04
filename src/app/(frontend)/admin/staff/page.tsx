@@ -1,5 +1,7 @@
 'use client'
+
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { Input } from '@/components/ui/Input'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ImageUpload } from '@/components/admin/ImageUpload'
@@ -170,81 +172,76 @@ export default function AdminStaffPage() {
         </div>
       )}
 
-      <div className="bliss-admin-card overflow-hidden">
-        {staff.length === 0 ? (
-          <p className="text-center text-[#1e211e]/40 py-14 text-sm">
-            No staff yet. Add your first team member above.
-          </p>
-        ) : (
-          <div className="bliss-admin-table-wrap">
-            <table className="w-full text-sm min-w-[560px]">
-              <thead className="bg-[#f4e6cd]/35">
-                <tr>
-                  {['Member', 'Role', 'Services', 'Status', ''].map(h => (
-                    <th
-                      key={h}
-                      className="text-left px-4 py-3 text-[10px] font-semibold text-[#1e211e]/50 uppercase tracking-[0.12em] sm:px-5"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map(s => (
-                  <tr key={s.id} className="border-t border-[#1e211e]/8 transition-colors hover:bg-[#faf8f4]/90">
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-[#edddc3]">
-                          {s.avatarUrl ? (
-                            <img src={s.avatarUrl} alt={s.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-[#6b5344]">
-                              {s.name.charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <span className="font-medium text-[#1e211e]">{s.name}</span>
+      {staff.length === 0 ? (
+        <p className="text-center text-[#1e211e]/40 py-14 text-sm">
+          No staff yet. Add your first team member above.
+        </p>
+      ) : (
+        <div className="services-cards-wrap">
+          <div className="service-list-wrapper">
+            <div role="list" className="service-list">
+              {staff.map((s) => {
+                const servicesLine = s.staffServices?.map(ss => ss.service.name).join(' · ') || 'Services not assigned'
+                const bioExcerpt = (s.bio && s.bio.length > 100) ? `${s.bio.slice(0, 97)}…` : (s.bio || 'Team member profile.')
+                return (
+                  <div key={s.id} role="listitem">
+                    <div className="service-card-wrap group/scard flex h-full flex-col !cursor-default">
+                      <div className="service-card-image-wrap">
+                        {s.avatarUrl ? (
+                          <Image
+                            src={s.avatarUrl}
+                            alt={s.name}
+                            fill
+                            sizes={BLISSORIA_CARD_SIZES}
+                            className="service-card-image object-cover"
+                          />
+                        ) : (
+                          <div
+                            className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#f4e6cd] via-[#edddc3] to-[#6b5344]/20"
+                            aria-hidden
+                          >
+                            <span className="font-display text-4xl text-[#1e211e]/30">{s.name.charAt(0).toUpperCase()}</span>
+                          </div>
+                        )}
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-5 sm:py-4">{s.role}</td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/55 text-xs sm:px-5 sm:py-4">
-                      {s.staffServices?.map(ss => ss.service.name).join(', ') || '—'}
-                    </td>
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <span
-                        className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
-                          s.isActive
-                            ? 'bg-[#8FA896]/20 text-[#3d5c45]'
-                            : 'bg-[#e8e4dc] text-[#1e211e]/50'
-                        }`}
-                      >
-                        {s.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right whitespace-nowrap sm:px-5 sm:py-4">
-                      <button
-                        type="button"
-                        onClick={() => editStaff(s)}
-                        className="text-xs text-[#6b5344] hover:underline mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deactivate(s.id)}
-                        className="text-xs text-[#1e211e]/35 hover:text-amber-700"
-                      >
-                        Deactivate
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className="service-card-content-wrapper">
+                        <p className="service-card-kicker">{s.isActive ? 'Active in booking' : 'Inactive'}</p>
+                        <div className="service-card-title-wrap">
+                          <div className="service-card-title">{s.name}</div>
+                        </div>
+                        <p className="service-card-kicker !-mt-1 !mb-2 !text-[15px] !font-medium !normal-case !tracking-normal !text-[#6b5344]">
+                          {s.role}
+                        </p>
+                        <div className="service-card-text-wrap">
+                          <p className="service-card-text">{bioExcerpt}</p>
+                        </div>
+                        <p className="service-card-text !text-[14px] !leading-snug opacity-80">{servicesLine}</p>
+                        <div className="mt-4 flex flex-col gap-2">
+                          <button type="button" onClick={() => editStaff(s)} className="tertiary-button">
+                            <span className="tertiary-button-text-wrap">
+                              <span className="tertiary-button-slide">
+                                <span className="tertiary-button-text">Edit member</span>
+                                <span className="tertiary-button-text">Edit member</span>
+                              </span>
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deactivate(s.id)}
+                            className="text-center text-xs text-[#1e211e]/35 transition-colors hover:text-amber-800"
+                          >
+                            Deactivate
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

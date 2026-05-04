@@ -237,8 +237,53 @@ body {
   gap: 28px;
   align-items: stretch;
 }
+.sara-auth-wrap--single {
+  max-width: 480px;
+  justify-content: center;
+}
+.sara-auth-wrap--single .sara-auth-card {
+  flex: none;
+  width: 100%;
+}
 @media (max-width: 767px) {
   .sara-auth-wrap { flex-direction: column; }
+}
+
+/* Auth: existing vs new account toggle */
+.sara-auth-segment {
+  display: flex;
+  width: 100%;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+  background: var(--sara-bg);
+  border: 1px solid var(--sara-border);
+  border-radius: 999px;
+}
+.sara-auth-segment button {
+  flex: 1;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: rgba(30, 27, 24, 0.55);
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.sara-auth-segment button:hover {
+  color: var(--sara-dark);
+}
+.sara-auth-segment button:focus-visible {
+  outline: 2px solid var(--sara-accent);
+  outline-offset: 2px;
+}
+.sara-auth-segment button[aria-pressed="true"] {
+  background: var(--sara-white);
+  color: var(--sara-dark);
+  box-shadow: 0 1px 4px rgba(30, 27, 24, 0.08);
 }
 
 .sara-auth-card {
