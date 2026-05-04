@@ -3,6 +3,7 @@ import { FrontendChrome } from '@/components/layout/FrontendChrome'
 import { LoadingScreen } from '@/components/layout/LoadingScreen'
 import type { Metadata } from 'next'
 import '@/styles/blissoria-site.css'
+import '@/styles/sarasvvati.css'
 
 export const metadata: Metadata = {
   title: 'Lumin Medspa | Non-invasive skin rejuvenation',

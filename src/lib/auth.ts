@@ -2,15 +2,21 @@ import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 
+// NextAuth v5 uses AUTH_SECRET / AUTH_URL — alias from NEXTAUTH_ vars if needed
+if (!process.env.AUTH_SECRET && process.env.NEXTAUTH_SECRET) {
+  process.env.AUTH_SECRET = process.env.NEXTAUTH_SECRET
+}
+if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
+  process.env.AUTH_URL = process.env.NEXTAUTH_URL
+}
+
 function normalizeEmail(raw: unknown) {
-  return String(raw ?? '')
-    .trim()
-    .toLowerCase()
+  return String(raw ?? '').trim().toLowerCase()
 }
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       name: 'credentials',
@@ -52,14 +58,14 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
+        token.role = (user as { role?: string }).role
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = String(token.id)
-        ;(session.user as any).role = token.role
+        ;(session.user as { role?: string }).role = token.role as string
       }
       return session
     },

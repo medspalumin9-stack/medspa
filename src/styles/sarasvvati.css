@@ -1,0 +1,583 @@
+/**
+ * Sarasvvati design system for Lumin Medspa
+ * Instrument Serif (display) + Inter (body)
+ * Terracotta accent #7c443a | Dark #1e1b18 | Warm white #f5f0e8
+ */
+
+/* ── Custom properties ───────────────────────────────────────────────────── */
+:root {
+  --sara-dark:    #1e1b18;
+  --sara-mid:     #343434;
+  --sara-accent:  #7c443a;
+  --sara-bg:      #f5f0e8;
+  --sara-bg2:     #ede8df;
+  --sara-cream:   #faf8f5;
+  --sara-white:   #ffffff;
+  --sara-border:  rgba(30, 27, 24, 0.10);
+  --sara-border2: rgba(30, 27, 24, 0.06);
+
+  /* alias existing blissoria vars to new palette */
+  --bliss-dark:       var(--sara-dark);
+  --bliss-white-rock: var(--sara-bg);
+  --bliss-almond:     var(--sara-bg2);
+}
+
+/* ── Base typography ─────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--sara-bg);
+  color: var(--sara-dark);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display,
+.sara-display {
+  font-family: 'Instrument Serif', Georgia, serif;
+}
+
+/* ── Navbar auto-hide ────────────────────────────────────────────────────── */
+.bliss-navbar {
+  transition:
+    background-color 0.35s ease,
+    border-color     0.35s ease,
+    box-shadow       0.35s ease,
+    transform        0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bliss-navbar.nav--hidden {
+  transform: translateY(-110%);
+}
+
+/* Solid state (scrolled / inner pages) */
+.bliss-navbar.bliss-navbar--solid {
+  background-color: var(--sara-bg);
+  border-bottom: 1px solid var(--sara-border);
+  box-shadow: 0 4px 24px rgba(30, 27, 24, 0.06);
+}
+
+.bliss-navbar--solid .bliss-brand-name   { color: var(--sara-dark); }
+.bliss-navbar--solid .bliss-brand-tagline { color: var(--sara-accent); }
+
+/* ── Sarasvvati button ───────────────────────────────────────────────────── */
+.sara-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--sara-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.sara-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.sara-btn:active { transform: translateY(0); }
+.sara-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.sara-btn-arrow {
+  width: 32px; height: 32px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.sara-btn-arrow svg { width: 14px; height: 14px; color: #fff; }
+
+.sara-btn--dark {
+  background-color: var(--sara-dark);
+  color: var(--sara-bg);
+}
+
+.sara-btn--ghost {
+  background: transparent;
+  color: var(--sara-dark);
+  border: 1px solid var(--sara-border);
+}
+.sara-btn--ghost:hover {
+  background: var(--sara-bg2);
+  border-color: var(--sara-border);
+}
+
+/* ── Form fields ─────────────────────────────────────────────────────────── */
+.sara-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(30, 27, 24, 0.50);
+  margin-bottom: 6px;
+}
+
+.sara-input {
+  width: 100%;
+  background: var(--sara-cream);
+  border: 1px solid var(--sara-border);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--sara-dark);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  appearance: none;
+}
+.sara-input::placeholder { color: rgba(30, 27, 24, 0.30); }
+.sara-input:focus {
+  border-color: var(--sara-accent);
+  box-shadow: 0 0 0 3px rgba(124, 68, 58, 0.10);
+}
+
+.sara-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231e1b18' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.sara-field-wrap { display: flex; flex-direction: column; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.sara-card {
+  background: var(--sara-white);
+  border: 1px solid var(--sara-border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.sara-card--soft {
+  background: var(--sara-cream);
+  border-color: var(--sara-border2);
+}
+
+/* ── Section layout ──────────────────────────────────────────────────────── */
+.sara-section {
+  padding-top: 96px;
+  padding-bottom: 96px;
+}
+@media (max-width: 768px) {
+  .sara-section { padding-top: 64px; padding-bottom: 64px; }
+}
+
+.sara-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.sara-container--wide {
+  max-width: 1440px;
+}
+
+/* ── Eyebrow / kicker ────────────────────────────────────────────────────── */
+.sara-kicker {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sara-accent);
+  margin-bottom: 14px;
+}
+
+/* ── Headings ────────────────────────────────────────────────────────────── */
+.sara-h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--sara-dark);
+}
+
+.sara-h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--sara-dark);
+}
+
+.sara-h3 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--sara-dark);
+}
+
+/* ── Auth page ───────────────────────────────────────────────────────────── */
+.sara-auth-bg {
+  min-height: 100svh;
+  background: var(--sara-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+.sara-auth-wrap {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  gap: 28px;
+  align-items: stretch;
+}
+@media (max-width: 767px) {
+  .sara-auth-wrap { flex-direction: column; }
+}
+
+.sara-auth-card {
+  flex: 1;
+  background: var(--sara-white);
+  border: 1px solid var(--sara-border);
+  border-radius: 24px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 60px rgba(30, 27, 24, 0.07);
+}
+@media (max-width: 480px) {
+  .sara-auth-card { padding: 32px 24px; }
+}
+
+.sara-auth-mark {
+  width: 48px; height: 48px;
+  border: 1px solid var(--sara-border);
+  border-radius: 50%;
+  background: var(--sara-bg);
+  display: grid; place-items: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px;
+  color: var(--sara-accent);
+  margin-bottom: 28px;
+}
+
+/* ── Booking section ─────────────────────────────────────────────────────── */
+.sara-booking-hero {
+  padding: 120px 0 48px;
+  background: var(--sara-bg);
+}
+
+/* ── Dashboard ───────────────────────────────────────────────────────────── */
+.sara-dashboard-bg {
+  background: var(--sara-bg);
+  min-height: 100svh;
+  padding-top: 88px; /* nav height */
+}
+
+.sara-greeting-hero {
+  background: var(--sara-dark);
+  color: var(--sara-bg);
+  padding: 56px 0;
+}
+
+.sara-next-appt-card {
+  background: rgba(124, 68, 58, 0.08);
+  border: 1px solid rgba(124, 68, 58, 0.15);
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.sara-date-block {
+  background: var(--sara-accent);
+  color: #fff;
+  border-radius: 14px;
+  width: 60px;
+  min-width: 60px;
+  height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.sara-date-block .sara-month {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.sara-date-block .sara-day {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.sara-tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--sara-border);
+  margin-bottom: 32px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.sara-tab-bar::-webkit-scrollbar { display: none; }
+
+.sara-tab {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(30, 27, 24, 0.50);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  text-decoration: none;
+  display: inline-block;
+}
+.sara-tab:hover { color: var(--sara-dark); }
+.sara-tab.is-active {
+  color: var(--sara-accent);
+  border-bottom-color: var(--sara-accent);
+}
+
+/* ── Admin layout ────────────────────────────────────────────────────────── */
+.sara-admin-root {
+  background: var(--sara-bg);
+  min-height: 100svh;
+}
+
+.sara-admin-main {
+  padding-top: 80px; /* nav height */
+}
+
+.sara-admin-page {
+  padding: 48px 0 96px;
+}
+
+.sara-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+@media (max-width: 900px) {
+  .sara-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .sara-stats-row { grid-template-columns: 1fr 1fr; }
+}
+
+.sara-stat-card {
+  background: var(--sara-white);
+  border: 1px solid var(--sara-border);
+  border-radius: 16px;
+  padding: 20px 24px;
+}
+
+.sara-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(30, 27, 24, 0.40);
+  margin-bottom: 8px;
+}
+
+.sara-stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--sara-dark);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.sara-table-wrap {
+  background: var(--sara-white);
+  border: 1px solid var(--sara-border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.sara-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.sara-table th {
+  background: var(--sara-bg);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(30, 27, 24, 0.40);
+  border-bottom: 1px solid var(--sara-border);
+  white-space: nowrap;
+}
+
+.sara-table td {
+  padding: 14px 16px;
+  color: var(--sara-dark);
+  border-bottom: 1px solid var(--sara-border2);
+  vertical-align: middle;
+}
+
+.sara-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sara-table tbody tr:hover > td {
+  background: var(--sara-bg);
+  cursor: pointer;
+}
+
+/* ── Service / product list item (Sarasvvati style) ─────────────────────── */
+.sara-service-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--sara-border);
+  cursor: pointer;
+  transition: color 0.2s;
+  gap: 16px;
+}
+.sara-service-item:last-child { border-bottom: none; }
+.sara-service-item:hover .sara-service-name { color: var(--sara-accent); }
+
+.sara-service-num {
+  font-size: 12px;
+  color: rgba(30, 27, 24, 0.35);
+  min-width: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sara-service-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 400;
+  color: var(--sara-dark);
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.sara-service-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: none;
+}
+@media (min-width: 640px) {
+  .sara-service-thumb { display: block; }
+}
+
+/* ── Pill badges ─────────────────────────────────────────────────────────── */
+.sara-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 100px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sara-pill--green  { background: rgba(143, 168, 150, 0.18); color: #3d5c45; }
+.sara-pill--amber  { background: rgba(237, 221, 195, 0.70); color: #6b5344; }
+.sara-pill--grey   { background: rgba(30, 27, 24, 0.08);    color: rgba(30,27,24,0.55); }
+.sara-pill--red    { background: rgba(220, 80, 60, 0.08);    color: #b03020; }
+.sara-pill--dark   { background: var(--sara-dark);           color: var(--sara-bg); }
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.sara-page-header {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--sara-border);
+  margin-bottom: 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ── Responsive utils ────────────────────────────────────────────────────── */
+.sara-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+@media (max-width: 640px) { .sara-2col { grid-template-columns: 1fr; } }
+
+.sara-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+@media (max-width: 900px) { .sara-3col { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 540px) { .sara-3col { grid-template-columns: 1fr; } }
+
+/* ── Accordion detail row ────────────────────────────────────────────────── */
+.sara-accordion-td {
+  padding: 0 !important;
+  background: var(--sara-bg) !important;
+  border-bottom: 1px solid var(--sara-border) !important;
+}
+
+.sara-accordion-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px 16px;
+}
+@media (max-width: 640px) {
+  .sara-accordion-inner { grid-template-columns: 1fr; }
+}
+
+/* ── Error & empty states ────────────────────────────────────────────────── */
+.sara-empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: rgba(30, 27, 24, 0.40);
+}
+
+/* ── Alert / toast ───────────────────────────────────────────────────────── */
+.sara-alert {
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.sara-alert--error { background: rgba(180,40,20,0.08); color: #b03020; }
+.sara-alert--success { background: rgba(60,130,70,0.09); color: #2a6b38; }
+
+/* ── Loading skeleton ────────────────────────────────────────────────────── */
+@keyframes sara-shimmer {
+  from { background-position: -400px 0; }
+  to   { background-position: 400px 0; }
+}
+.sara-skeleton {
+  background: linear-gradient(90deg, var(--sara-bg2) 25%, var(--sara-bg) 50%, var(--sara-bg2) 75%);
+  background-size: 800px 100%;
+  animation: sara-shimmer 1.4s infinite linear;
+  border-radius: 8px;
+}

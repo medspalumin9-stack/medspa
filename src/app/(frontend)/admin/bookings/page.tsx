@@ -1,8 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 
 type Appointment = {
   id: string
@@ -17,12 +16,39 @@ type Appointment = {
   service?: { name: string }
   staff?: { name: string }
 }
+
 const STATUSES = ['SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const
+type Tab = 'requests' | 'upcoming' | 'completed'
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'requests', label: 'Booking requests' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'completed', label: 'Completed' },
+]
+
+function tabStatuses(tab: Tab): string[] {
+  if (tab === 'requests') return ['SCHEDULED']
+  if (tab === 'upcoming') return ['CONFIRMED']
+  return ['COMPLETED', 'CANCELLED']
+}
+
+function statusPill(status: string) {
+  switch (status) {
+    case 'CONFIRMED':  return 'sara-pill sara-pill--green'
+    case 'CANCELLED':  return 'sara-pill sara-pill--red'
+    case 'COMPLETED':  return 'sara-pill sara-pill--grey'
+    default:           return 'sara-pill sara-pill--amber'
+  }
+}
+
+const DT_LABEL = 'sara-label'
+const DT_VALUE = 'text-sm text-[var(--sara-dark)]'
 
 export default function AdminBookingsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [filter, setFilter] = useState('ALL')
-  const [selected, setSelected] = useState<Appointment | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('requests')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [savingNotes, setSavingNotes] = useState(false)
 
@@ -34,13 +60,14 @@ export default function AdminBookingsPage() {
     return list
   }
 
-  useEffect(() => {
-    void load()
-  }, [])
+  useEffect(() => { void load() }, [])
 
   useEffect(() => {
-    if (selected) setNoteDraft(selected.notes ?? '')
-  }, [selected])
+    if (expandedId) {
+      const appt = appointments.find((a) => a.id === expandedId)
+      setNoteDraft(appt?.notes ?? '')
+    }
+  }, [expandedId, appointments])
 
   const updateStatus = async (id: string, status: string) => {
     await fetch('/api/admin/bookings', {
@@ -48,146 +75,245 @@ export default function AdminBookingsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
-    const list = await load()
-    setSelected((s) => {
-      if (!s || s.id !== id) return s
-      return list.find((a) => a.id === id) ?? { ...s, status }
-    })
+    await load()
   }
 
   const saveNotes = async () => {
-    if (!selected) return
+    if (!expandedId) return
     setSavingNotes(true)
     await fetch('/api/admin/bookings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, notes: noteDraft }),
+      body: JSON.stringify({ id: expandedId, notes: noteDraft }),
     })
-    const list = await load()
+    await load()
     setSavingNotes(false)
-    setSelected((s) => {
-      if (!s) return null
-      return list.find((a) => a.id === s.id) ?? { ...s, notes: noteDraft }
-    })
   }
 
-  const displayed = filter === 'ALL' ? appointments : appointments.filter((a) => a.status === filter)
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const totalBookings  = appointments.length
+  const todaysVisits   = appointments.filter((a) => format(new Date(a.startTime), 'yyyy-MM-dd') === today).length
+  const confirmed      = appointments.filter((a) => a.status === 'CONFIRMED').length
+  const cancelled      = appointments.filter((a) => a.status === 'CANCELLED').length
+
+  const displayed =
+    filter !== 'ALL'
+      ? appointments.filter((a) => a.status === filter)
+      : appointments.filter((a) => tabStatuses(activeTab).includes(a.status))
+
+  const expandedAppt = appointments.find((a) => a.id === expandedId) ?? null
+  const toggleRow = (id: string) => setExpandedId((prev) => (prev === id ? null : id))
 
   return (
-    <div className="bliss-admin-dash">
-      <AdminPageHeader
-        eyebrow="Operations"
-        title="Bookings"
-        description={
-          <>
-            Full guest contact details and internal notes. Link clients from the{' '}
-            <Link href="/admin/clients" className="font-medium text-[#6b5344] underline-offset-2 hover:underline">
-              Clients
-            </Link>{' '}
-            page when they have an account.
-          </>
-        }
-        actions={
-          <div className="flex flex-wrap gap-2">
+    <div className="sara-admin-page">
+      <div className="sara-container">
+
+        {/* ── Page header ────────────────────────────────────────────────── */}
+        <div className="sara-page-header">
+          <div>
+            <p className="sara-kicker">Operations</p>
+            <h1 className="sara-h2">Bookings</h1>
+            <p style={{ fontSize: '15px', color: 'rgba(30,27,24,0.55)', marginTop: '6px' }}>
+              Guest contact details and internal notes. Link clients from the{' '}
+              <Link href="/admin/clients" style={{ color: 'var(--sara-accent)', textDecoration: 'underline' }}>Clients</Link>{' '}
+              page.
+            </p>
+          </div>
+          {/* Status filter pills */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {['ALL', ...STATUSES].map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setFilter(s)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
-                  filter === s
-                    ? 'bg-[#1e211e] text-[#f4e6cd]'
-                    : 'border border-[#1e211e]/10 bg-white text-text/50 hover:text-[#1e211e]'
-                }`}
+                className={filter === s ? 'sara-pill sara-pill--dark' : 'sara-pill sara-pill--grey'}
+                style={{ cursor: 'pointer', border: 'none', padding: '5px 14px', fontSize: '11px' }}
               >
                 {s.toLowerCase()}
               </button>
             ))}
           </div>
-        }
-        className="!mb-8"
-      />
+        </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_minmax(280px,360px)]">
-        <div className="bg-white border border-[#1e211e]/10 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(30,33,30,0.05)]">
+        {/* ── Stats row ──────────────────────────────────────────────────── */}
+        <div className="sara-stats-row">
+          {[
+            { label: 'Total bookings', value: totalBookings },
+            { label: "Today's visits",  value: todaysVisits },
+            { label: 'Confirmed',       value: confirmed },
+            { label: 'Cancelled',       value: cancelled },
+          ].map(({ label, value }) => (
+            <div key={label} className="sara-stat-card">
+              <p className="sara-stat-label">{label}</p>
+              <p className="sara-stat-value">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Tab bar ────────────────────────────────────────────────────── */}
+        <div className="sara-tab-bar">
+          {TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { setActiveTab(key); setFilter('ALL'); setExpandedId(null) }}
+              className={`sara-tab ${activeTab === key && filter === 'ALL' ? 'is-active' : ''}`}
+            >
+              {label}
+              <span style={{
+                marginLeft: '6px', fontSize: '10px', fontWeight: 700,
+                background: 'rgba(30,27,24,0.07)', borderRadius: '10px', padding: '1px 6px',
+              }}>
+                {appointments.filter((a) => tabStatuses(key).includes(a.status)).length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Table ──────────────────────────────────────────────────────── */}
+        <div className="sara-table-wrap">
           {displayed.length === 0 ? (
-            <p className="text-center text-text/40 py-12 text-sm">No bookings in this filter.</p>
+            <div className="sara-empty">No bookings in this view.</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[720px]">
-                <thead className="bg-[#f4e6cd]/35">
+            <div style={{ overflowX: 'auto' }}>
+              <table className="sara-table" style={{ minWidth: '760px' }}>
+                <thead>
                   <tr>
                     {['Client', 'Email', 'Service', 'When', 'Staff', 'Status', ''].map((h) => (
-                      <th
-                        key={h}
-                        className="text-left px-4 py-3 text-[10px] font-semibold text-text/45 uppercase tracking-[0.12em]"
-                      >
-                        {h}
-                      </th>
+                      <th key={h}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {displayed.map((a) => (
-                    <tr
-                      key={a.id}
-                      className={`border-t border-[#1e211e]/8 cursor-pointer transition-colors ${
-                        selected?.id === a.id ? 'bg-[#f4e6cd]/40' : 'hover:bg-[#faf8f4]'
-                      }`}
-                      onClick={() => setSelected(a)}
-                    >
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-[#1e211e]">{a.clientName}</p>
-                        <p className="text-[11px] text-text/45 mt-0.5">{a.clientPhone}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <a
-                          href={`mailto:${a.clientEmail}`}
-                          className="text-[#6b5344] hover:underline text-xs"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {a.clientEmail}
-                        </a>
-                      </td>
-                      <td className="px-4 py-3 text-text/70">{a.service?.name}</td>
-                      <td className="px-4 py-3 text-text/70 text-xs whitespace-nowrap">
-                        {format(new Date(a.startTime), 'MMM d, yyyy')}
-                        <br />
-                        <span className="text-text/50">
-                          {format(new Date(a.startTime), 'h:mm a')} – {format(new Date(a.endTime), 'h:mm a')}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-text/70">{a.staff?.name}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${
-                            a.status === 'CONFIRMED'
-                              ? 'bg-[#8FA896]/20 text-[#3d5c45]'
-                              : a.status === 'CANCELLED'
-                                ? 'bg-red-50 text-red-600'
-                                : a.status === 'COMPLETED'
-                                  ? 'bg-[#e8e4dc] text-text/60'
-                                  : 'bg-[#f4e6cd]/80 text-[#6b5344]'
-                          }`}
-                        >
-                          {a.status.toLowerCase()}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={a.status}
-                          onChange={(e) => updateStatus(a.id, e.target.value)}
-                          className="text-xs border border-[#1e211e]/15 rounded-lg px-2 py-1.5 bg-white text-[#1e211e] focus:outline-none focus:ring-1 focus:ring-[#6b5344]/30"
-                          aria-label={`Update status for ${a.clientName}`}
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s.charAt(0) + s.slice(1).toLowerCase()}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
+                    <Fragment key={a.id}>
+                      {/* Main row */}
+                      <tr
+                        style={{ background: expandedId === a.id ? 'var(--sara-bg)' : undefined }}
+                        onClick={() => toggleRow(a.id)}
+                      >
+                        <td>
+                          <p style={{ fontWeight: 500 }}>{a.clientName}</p>
+                          <p style={{ fontSize: '11px', color: 'rgba(30,27,24,0.45)', marginTop: '2px' }}>{a.clientPhone}</p>
+                        </td>
+                        <td>
+                          <a
+                            href={`mailto:${a.clientEmail}`}
+                            style={{ color: 'var(--sara-accent)', fontSize: '12px' }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {a.clientEmail}
+                          </a>
+                        </td>
+                        <td style={{ color: 'rgba(30,27,24,0.70)' }}>{a.service?.name}</td>
+                        <td style={{ fontSize: '12px', color: 'rgba(30,27,24,0.65)', whiteSpace: 'nowrap' }}>
+                          {format(new Date(a.startTime), 'MMM d, yyyy')}
+                          <br />
+                          <span style={{ color: 'rgba(30,27,24,0.45)' }}>
+                            {format(new Date(a.startTime), 'h:mm a')} – {format(new Date(a.endTime), 'h:mm a')}
+                          </span>
+                        </td>
+                        <td style={{ color: 'rgba(30,27,24,0.70)' }}>{a.staff?.name}</td>
+                        <td><span className={statusPill(a.status)}>{a.status.toLowerCase()}</span></td>
+                        <td style={{ textAlign: 'right' }}>
+                          <span
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                              width: 24, height: 24, borderRadius: '50%',
+                              background: expandedId === a.id ? 'var(--sara-dark)' : 'rgba(30,27,24,0.07)',
+                              color: expandedId === a.id ? 'var(--sara-bg)' : 'rgba(30,27,24,0.50)',
+                              transition: 'all 0.2s',
+                            }}
+                            aria-label={expandedId === a.id ? 'Collapse' : 'Expand'}
+                          >
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
+                              style={{ transform: expandedId === a.id ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>
+                              <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        </td>
+                      </tr>
+
+                      {/* Detail panel */}
+                      {expandedId === a.id && expandedAppt && (
+                        <tr>
+                          <td colSpan={7} className="sara-accordion-td">
+                            <div style={{ padding: '24px 16px', display: 'grid', gridTemplateColumns: '1fr 300px', gap: '32px' }}>
+                              {/* Booking details */}
+                              <div>
+                                <p className="sara-kicker" style={{ marginBottom: '16px' }}>
+                                  Booking #{expandedAppt.id.slice(0, 8)}…
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 24px' }}>
+                                  {[
+                                    { label: 'Guest', value: expandedAppt.clientName },
+                                    { label: 'Phone', value: <a href={`tel:${expandedAppt.clientPhone}`} style={{ color: 'var(--sara-accent)' }}>{expandedAppt.clientPhone}</a> },
+                                    { label: 'Email', value: <a href={`mailto:${expandedAppt.clientEmail}`} style={{ color: 'var(--sara-accent)', wordBreak: 'break-all' }}>{expandedAppt.clientEmail}</a> },
+                                    { label: 'Service', value: expandedAppt.service?.name ?? '—' },
+                                    { label: 'Staff', value: expandedAppt.staff?.name ?? '—' },
+                                    {
+                                      label: 'Schedule',
+                                      value: (
+                                        <>
+                                          {format(new Date(expandedAppt.startTime), 'EEE, MMM d')}
+                                          <br />
+                                          <span style={{ color: 'rgba(30,27,24,0.50)', fontSize: '11px' }}>
+                                            {format(new Date(expandedAppt.startTime), 'h:mm a')} – {format(new Date(expandedAppt.endTime), 'h:mm a')}
+                                          </span>
+                                        </>
+                                      ),
+                                    },
+                                  ].map(({ label, value }) => (
+                                    <div key={label}>
+                                      <span className={DT_LABEL}>{label}</span>
+                                      <span className={DT_VALUE} style={{ fontWeight: label === 'Guest' ? 500 : 400 }}>{value}</span>
+                                    </div>
+                                  ))}
+                                  <div>
+                                    <span className={DT_LABEL}>Status</span>
+                                    <select
+                                      value={expandedAppt.status}
+                                      onChange={(e) => { e.stopPropagation(); void updateStatus(expandedAppt.id, e.target.value) }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="sara-input sara-select"
+                                      style={{ padding: '6px 32px 6px 10px', fontSize: '12px', borderRadius: '8px' }}
+                                    >
+                                      {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>)}
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Notes editor */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <label htmlFor={`notes-${expandedAppt.id}`} className={DT_LABEL}>
+                                  Internal notes
+                                </label>
+                                <textarea
+                                  id={`notes-${expandedAppt.id}`}
+                                  value={noteDraft}
+                                  onChange={(e) => setNoteDraft(e.target.value)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  rows={5}
+                                  placeholder="Private notes for staff (not shown to clients)…"
+                                  className="sara-input"
+                                  style={{ borderRadius: '12px', resize: 'vertical', minHeight: '100px', fontSize: '13px' }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); void saveNotes() }}
+                                  disabled={savingNotes}
+                                  className="sara-btn sara-btn--dark"
+                                  style={{ justifyContent: 'center', padding: '10px 20px', fontSize: '12px' }}
+                                >
+                                  {savingNotes ? 'Saving…' : 'Save notes'}
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
@@ -195,105 +321,6 @@ export default function AdminBookingsPage() {
           )}
         </div>
 
-        <aside className="bg-white border border-[#1e211e]/10 rounded-2xl p-6 shadow-[0_8px_30px_rgba(30,33,30,0.05)] xl:sticky xl:top-6">
-          {!selected ? (
-            <p className="text-sm text-text/50 leading-relaxed">
-              Select a row to view full booking details, email the guest, and add internal notes for your team.
-            </p>
-          ) : (
-            <div className="space-y-5">
-              <div>
-                <h2 className="font-display text-lg text-[#1e211e]">Booking details</h2>
-                <p className="text-[11px] text-text/40 mt-1 uppercase tracking-wider">
-                  Reference · {selected.id.slice(0, 8)}…
-                </p>
-              </div>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Guest</dt>
-                  <dd className="text-[#1e211e] font-medium mt-0.5">{selected.clientName}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Email</dt>
-                  <dd className="mt-0.5">
-                    <a
-                      href={`mailto:${selected.clientEmail}`}
-                      className="text-[#6b5344] hover:underline break-all"
-                    >
-                      {selected.clientEmail}
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Phone</dt>
-                  <dd className="mt-0.5">
-                    <a href={`tel:${selected.clientPhone}`} className="text-[#6b5344] hover:underline">
-                      {selected.clientPhone}
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Service</dt>
-                  <dd className="text-text/80 mt-0.5">{selected.service?.name ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Schedule</dt>
-                  <dd className="text-text/80 mt-0.5">
-                    {format(new Date(selected.startTime), 'EEEE, MMM d, yyyy')}
-                    <br />
-                    {format(new Date(selected.startTime), 'h:mm a')} –{' '}
-                    {format(new Date(selected.endTime), 'h:mm a')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Staff</dt>
-                  <dd className="text-text/80 mt-0.5">{selected.staff?.name ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Status</dt>
-                  <dd className="mt-1">
-                    <select
-                      value={selected.status}
-                      onChange={(e) => updateStatus(selected.id, e.target.value)}
-                      className="text-sm border border-[#1e211e]/15 rounded-lg px-3 py-2 w-full bg-white text-[#1e211e]"
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s.charAt(0) + s.slice(1).toLowerCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </dd>
-                </div>
-              </dl>
-
-              <div>
-                <label
-                  htmlFor="booking-notes"
-                  className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40 block mb-2"
-                >
-                  Internal notes
-                </label>
-                <textarea
-                  id="booking-notes"
-                  value={noteDraft}
-                  onChange={(e) => setNoteDraft(e.target.value)}
-                  rows={4}
-                  placeholder="Private notes for staff (not shown to clients)…"
-                  className="w-full px-3 py-2.5 text-sm border border-[#1e211e]/15 rounded-xl bg-[#faf8f4] text-[#1e211e] placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20 resize-y min-h-[100px]"
-                />
-                <button
-                  type="button"
-                  onClick={saveNotes}
-                  disabled={savingNotes}
-                  className="mt-2 w-full rounded-full bg-[#1e211e] py-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#f4e6cd] hover:opacity-90 disabled:opacity-50"
-                >
-                  {savingNotes ? 'Saving…' : 'Save notes'}
-                </button>
-              </div>
-            </div>
-          )}
-        </aside>
       </div>
     </div>
   )

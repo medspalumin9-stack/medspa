@@ -4,15 +4,14 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { BlissNavLink } from '@/components/layout/Navbar'
 
 const NAV: [string, string][] = [
-  ['Overview', '/admin'],
-  ['Bookings', '/admin/bookings'],
-  ['Clients', '/admin/clients'],
-  ['Services', '/admin/services'],
-  ['Shop', '/admin/products'],
-  ['Staff', '/admin/staff'],
+  ['Overview',  '/admin'],
+  ['Bookings',  '/admin/bookings'],
+  ['Clients',   '/admin/clients'],
+  ['Services',  '/admin/services'],
+  ['Shop',      '/admin/products'],
+  ['Staff',     '/admin/staff'],
 ]
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,32 +24,49 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="bliss-admin-root min-h-screen">
+    <div className="sara-admin-root">
+      {/* ── Admin Navbar ──────────────────────────────────────────────────── */}
       <nav className="bliss-navbar bliss-navbar--solid" role="banner">
         <div className="bliss-container">
           <div className="bliss-nav-wrapper">
-            <Link href="/admin" className="bliss-brand-logo flex-col items-start md:flex-row md:items-center md:gap-3">
+            {/* Brand */}
+            <Link
+              href="/admin"
+              className="bliss-brand-logo flex-col items-start md:flex-row md:items-center md:gap-3"
+            >
               <span className="bliss-brand-name font-display text-[1.35rem] md:text-[1.6rem] leading-none tracking-tight">
                 Lumin
               </span>
-              <span className="bliss-brand-tagline font-sans text-[11px] md:text-xs font-medium tracking-wide mt-1 md:mt-0">
-                Medspa · Admin
+              <span className="bliss-brand-tagline font-sans text-[11px] md:text-xs font-semibold tracking-widest uppercase mt-1 md:mt-0">
+                Admin
               </span>
             </Link>
 
+            {/* Desktop nav pill */}
             <div className="bliss-nav-center">
               <div className="bliss-nav-menu-pill">
                 {NAV.map(([label, href]) => (
-                  <BlissNavLink key={href} href={href} current={isCurrent(href)}>
-                    {label}
-                  </BlissNavLink>
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={isCurrent(href) ? 'page' : undefined}
+                    className="bliss-nav-link"
+                  >
+                    <span className="bliss-nav-link-text-wrap">
+                      <span className="bliss-nav-link-slide">
+                        <span className="bliss-nav-link-text-line">{label}</span>
+                        <span className="bliss-nav-link-text-line">{label}</span>
+                      </span>
+                    </span>
+                  </Link>
                 ))}
               </div>
             </div>
 
+            {/* Right actions */}
             <div className="bliss-nav-right">
               <Link href="/" className="bliss-nav-ghost hidden md:inline">
-                View website
+                View site
               </Link>
               <button
                 type="button"
@@ -59,6 +75,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               >
                 Sign out
               </button>
+              {/* Hamburger */}
               <button
                 type="button"
                 className="bliss-menu-button md:hidden"
@@ -66,23 +83,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen((o) => !o)}
               >
-                <span
-                  className="bliss-menu-bar"
-                  style={{
-                    transform: mobileOpen ? 'translateY(8px) rotate(45deg)' : undefined,
-                  }}
-                />
+                <span className="bliss-menu-bar" style={{ transform: mobileOpen ? 'translateY(8px) rotate(45deg)' : undefined }} />
                 <span className="bliss-menu-bar" style={{ opacity: mobileOpen ? 0 : 1 }} />
-                <span
-                  className="bliss-menu-bar"
-                  style={{
-                    transform: mobileOpen ? 'translateY(-8px) rotate(-45deg)' : undefined,
-                  }}
-                />
+                <span className="bliss-menu-bar" style={{ transform: mobileOpen ? 'translateY(-8px) rotate(-45deg)' : undefined }} />
               </button>
             </div>
           </div>
 
+          {/* Mobile panel */}
           <div className={cn('bliss-mobile-panel', mobileOpen && 'is-open')}>
             <div className="bliss-mobile-inner">
               {NAV.map(([label, href]) => (
@@ -90,9 +98,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   {label}
                 </Link>
               ))}
-              <Link href="/" className="bliss-mobile-link" onClick={() => setMobileOpen(false)}>
-                View website
-              </Link>
+              <Link href="/" className="bliss-mobile-link" onClick={() => setMobileOpen(false)}>View site</Link>
               <button type="button" className="bliss-mobile-link text-left" onClick={() => signOut({ callbackUrl: '/' })}>
                 Sign out
               </button>
@@ -101,7 +107,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <main className="bliss-admin-page-main blissoria-services-scope">{children}</main>
+      <main className="sara-admin-main">{children}</main>
     </div>
   )
 }
