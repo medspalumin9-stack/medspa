@@ -10,6 +10,18 @@ if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
   process.env.AUTH_URL = process.env.NEXTAUTH_URL
 }
 
+/** Vercel builds often inherit `.env` with localhost; drop it so Auth uses the request host (trustHost). */
+if (process.env.VERCEL) {
+  const isLocalhostUrl = (v: string | undefined) =>
+    Boolean(v && (v.includes('localhost') || v.includes('127.0.0.1')))
+  if (isLocalhostUrl(process.env.AUTH_URL)) {
+    delete process.env.AUTH_URL
+  }
+  if (isLocalhostUrl(process.env.NEXTAUTH_URL)) {
+    delete process.env.NEXTAUTH_URL
+  }
+}
+
 function normalizeEmail(raw: unknown) {
   return String(raw ?? '').trim().toLowerCase()
 }

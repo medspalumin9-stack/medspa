@@ -1,7 +1,8 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutToHome } from '@/lib/client-sign-out'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ADMIN_NAV, firstAllowedAdminPath, userHasAdminSection } from '@/lib/admin-sections'
@@ -70,7 +71,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               </Link>
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => void signOutToHome()}
                 className="bliss-nav-ghost hidden md:inline"
               >
                 Sign out
@@ -99,7 +100,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
               <Link href="/" className="bliss-mobile-link" onClick={() => setMobileOpen(false)}>View site</Link>
-              <button type="button" className="bliss-mobile-link text-left" onClick={() => signOut({ callbackUrl: '/' })}>
+              <button type="button" className="bliss-mobile-link text-left" onClick={() => void signOutToHome()}>
                 Sign out
               </button>
             </div>

@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { signOutToHome } from '@/lib/client-sign-out'
 import { usePathname } from 'next/navigation'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useMotionValueEvent, useScroll } from 'framer-motion'
@@ -176,7 +177,7 @@ export function Navbar() {
             {session && (
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => void signOutToHome()}
                 className="bliss-nav-ghost hidden md:inline"
               >
                 Sign out
@@ -234,7 +235,7 @@ export function Navbar() {
               <button
                 type="button"
                 className="bliss-mobile-link text-left"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => void signOutToHome()}
               >
                 Sign out
               </button>
