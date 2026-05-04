@@ -1,4 +1,4 @@
-import { SessionProvider } from 'next-auth/react'
+import { SessionProviders } from '@/components/providers/SessionProviders'
 import { FrontendChrome } from '@/components/layout/FrontendChrome'
 import { LoadingScreen } from '@/components/layout/LoadingScreen'
 import type { Metadata } from 'next'
@@ -16,13 +16,13 @@ export default function FrontendLayout({
   children: React.ReactNode
 }) {
   return (
-    <SessionProvider>
+    <SessionProviders>
       <div className="page-wrapper">
         <LoadingScreen />
         <FrontendChrome>
           <main className="main flex-1">{children}</main>
         </FrontendChrome>
       </div>
-    </SessionProvider>
+    </SessionProviders>
   )
 }
