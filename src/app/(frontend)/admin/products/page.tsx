@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { ProductEditForm, type ProductFormState } from '@/components/admin/ProductEditForm'
 import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
+import { formatGhs } from '@/lib/format-currency'
 
 type Product = {
   id: string
@@ -211,7 +212,7 @@ export default function AdminProductsPage() {
                             <div className="service-card-text-wrap">
                               <p className="service-card-text">{excerpt || '—'}</p>
                             </div>
-                            <div className="service-card-price">${p.price}</div>
+                            <div className="service-card-price">{formatGhs(p.price)}</div>
                             <div className="mt-1 flex flex-col gap-2">
                               <button type="button" onClick={() => startEdit(p)} className="tertiary-button">
                                 <span className="tertiary-button-text-wrap">

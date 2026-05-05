@@ -32,7 +32,7 @@ export function ServiceEditForm({ form, setForm, loading, onSave, onCancel, vari
         <Input label="Name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
         <div className="flex gap-3">
           <Input
-            label="Price ($)"
+            label="Price (GHS)"
             type="number"
             value={String(form.price)}
             onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))}

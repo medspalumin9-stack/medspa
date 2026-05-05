@@ -4,6 +4,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { BookingBlocksPanel } from '@/components/admin/BookingBlocksPanel'
 
 type Appointment = {
   id: string
@@ -135,6 +136,8 @@ export default function AdminBookingsPage() {
           </>
         }
       />
+
+      <BookingBlocksPanel />
 
       <section aria-labelledby="bookings-stats-heading" className="mb-10">
         <h2 id="bookings-stats-heading" className="sr-only">Booking statistics</h2>

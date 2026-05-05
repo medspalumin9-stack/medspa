@@ -32,7 +32,7 @@ export function ProductEditForm({ form, setForm, loading, onSave, onCancel, vari
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 cursor-auto">
         <Input label="Name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
         <Input
-          label="Price ($)"
+          label="Price (GHS)"
           type="number"
           value={String(form.price)}
           onChange={(e) => setForm((p) => ({ ...p, price: Number(e.target.value) }))}

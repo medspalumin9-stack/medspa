@@ -75,7 +75,6 @@ function SignInPanel() {
 
   return (
     <>
-      <div className="sara-auth-mark">✦</div>
       <p className="sara-kicker">Welcome back</p>
       <h1 className="sara-h2" style={{ marginBottom: '6px' }}>Sign in</h1>
       <p style={{ fontSize: '14px', color: 'rgba(30,27,24,0.55)', marginBottom: '32px' }}>
@@ -137,7 +136,6 @@ function RegisterPanel() {
 
   return (
     <>
-      <div className="sara-auth-mark" style={{ color: 'var(--sara-accent)', borderColor: 'rgba(124,68,58,0.15)' }}>✧</div>
       <p className="sara-kicker">New here?</p>
       <h2 className="sara-h2" style={{ marginBottom: '6px' }}>Join Lumin</h2>
       <p style={{ fontSize: '14px', color: 'rgba(30,27,24,0.55)', marginBottom: '32px' }}>

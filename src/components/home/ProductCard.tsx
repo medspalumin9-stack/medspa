@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import Image from 'next/image'
 import { generateWhatsAppLink } from '@/lib/whatsapp'
+import { formatGhs } from '@/lib/format-currency'
 
 interface Props {
   product: { id: string; name: string; price: number; imageUrl: string }
@@ -22,7 +23,7 @@ export function ProductCard({ product, index }: Props) {
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
         <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{ background: 'linear-gradient(to top, rgba(42,31,20,0.5) 0%, transparent 60%)' }}>
-          <a href={generateWhatsAppLink(product.name, String(product.price))}
+          <a href={generateWhatsAppLink(product.name, product.price)}
             target="_blank" rel="noopener noreferrer"
             className="w-full py-2.5 text-center text-[10px] tracking-[0.2em] uppercase transition-colors"
             style={{ backgroundColor: '#F8F2EA', color: '#2A1F14' }}>
@@ -36,7 +37,7 @@ export function ProductCard({ product, index }: Props) {
           <p className="text-[11px] tracking-[0.08em] uppercase mt-0.5" style={{ color: '#9C8060' }}>Skincare</p>
         </div>
         <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.05rem', fontWeight: 300, color: '#3D2E1E' }}>
-          ${product.price}
+          {formatGhs(product.price)}
         </span>
       </div>
     </motion.div>

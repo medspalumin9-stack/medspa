@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Prisma } from '@prisma/client'
+import { formatGhs } from '@/lib/format-currency'
 
 type AppointmentWithRelations = Prisma.AppointmentGetPayload<{
   include: { service: true; staff: true }
@@ -321,9 +322,9 @@ export default async function DashboardPage() {
                           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {pp.product?.name}
                           </span>
-                          {pp.product?.price && (
+                          {pp.product?.price != null && pp.product.price > 0 && (
                             <span style={{ marginLeft: '12px', flexShrink: 0, fontSize: '12px', color: 'var(--sara-accent)', fontWeight: 600 }}>
-                              ${pp.product.price}
+                              {formatGhs(pp.product.price)}
                             </span>
                           )}
                         </Link>

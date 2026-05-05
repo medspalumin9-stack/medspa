@@ -134,6 +134,15 @@ model Appointment {
   user    User?   @relation(fields: [userId], references: [id])
 }
 
+/// Admin-defined closures (holidays, maintenance, etc.) — blocks all staff for online booking.
+model BookingBlock {
+  id        String   @id @default(cuid())
+  startAt   DateTime
+  endAt     DateTime
+  note      String?
+  createdAt DateTime @default(now())
+}
+
 model ProfileProduct {
   profileId String
   productId String
