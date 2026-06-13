@@ -14,14 +14,24 @@ export function ImageUpload({ value, onChange, label = 'Photo' }: Props) {
   const [error, setError] = useState('')
 
   const handleFile = async (file: File) => {
-    setError(''); setUploading(true)
-    const fd = new FormData()
-    fd.append('file', file)
-    const res = await fetch('/api/upload', { method: 'POST', body: fd })
-    const data = await res.json()
-    setUploading(false)
-    if (data.url) onChange(data.url)
-    else setError(data.error || 'Upload failed')
+    setError('')
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Upload failed')
+        return
+      }
+      if (data.url) onChange(data.url)
+      else setError(data.error || 'Upload failed')
+    } catch {
+      setError('Upload failed. Please try again.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
