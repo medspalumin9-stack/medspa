@@ -1,8 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+
+import { Fragment, useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { BookingBlocksPanel } from '@/components/admin/BookingBlocksPanel'
 
 type Appointment = {
   id: string
@@ -17,12 +19,39 @@ type Appointment = {
   service?: { name: string }
   staff?: { name: string }
 }
+
 const STATUSES = ['SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const
+type Tab = 'requests' | 'upcoming' | 'completed'
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'requests', label: 'Booking requests' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'completed', label: 'Completed' },
+]
+
+function tabStatuses(tab: Tab): string[] {
+  if (tab === 'requests') return ['SCHEDULED']
+  if (tab === 'upcoming') return ['CONFIRMED']
+  return ['COMPLETED', 'CANCELLED']
+}
+
+function statusPill(status: string) {
+  switch (status) {
+    case 'CONFIRMED': return 'bg-emerald-50 text-emerald-800'
+    case 'CANCELLED': return 'bg-red-50 text-red-700'
+    case 'COMPLETED': return 'bg-[#e8e4dc] text-[#1e211e]/65'
+    default: return 'bg-[#f4e6cd] text-[#6b5344]'
+  }
+}
+
+const DT_LABEL = 'block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1e211e]/45 mb-1'
+const DT_VALUE = 'text-sm text-[#1e211e]'
 
 export default function AdminBookingsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [filter, setFilter] = useState('ALL')
-  const [selected, setSelected] = useState<Appointment | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('requests')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [noteDraft, setNoteDraft] = useState('')
   const [savingNotes, setSavingNotes] = useState(false)
 
@@ -35,12 +64,20 @@ export default function AdminBookingsPage() {
   }
 
   useEffect(() => {
-    void load()
+    const frame = requestAnimationFrame(() => {
+      void load()
+    })
+    return () => cancelAnimationFrame(frame)
   }, [])
 
   useEffect(() => {
-    if (selected) setNoteDraft(selected.notes ?? '')
-  }, [selected])
+    if (!expandedId) return
+    const frame = requestAnimationFrame(() => {
+      const appt = appointments.find((a) => a.id === expandedId)
+      setNoteDraft(appt?.notes ?? '')
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [expandedId, appointments])
 
   const updateStatus = async (id: string, status: string) => {
     await fetch('/api/admin/bookings', {
@@ -48,30 +85,41 @@ export default function AdminBookingsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     })
-    const list = await load()
-    setSelected((s) => {
-      if (!s || s.id !== id) return s
-      return list.find((a) => a.id === id) ?? { ...s, status }
-    })
+    await load()
   }
 
   const saveNotes = async () => {
-    if (!selected) return
+    if (!expandedId) return
     setSavingNotes(true)
     await fetch('/api/admin/bookings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: selected.id, notes: noteDraft }),
+      body: JSON.stringify({ id: expandedId, notes: noteDraft }),
     })
-    const list = await load()
+    await load()
     setSavingNotes(false)
-    setSelected((s) => {
-      if (!s) return null
-      return list.find((a) => a.id === s.id) ?? { ...s, notes: noteDraft }
-    })
   }
 
-  const displayed = filter === 'ALL' ? appointments : appointments.filter((a) => a.status === filter)
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const totalBookings = appointments.length
+  const todaysVisits = appointments.filter((a) => format(new Date(a.startTime), 'yyyy-MM-dd') === today).length
+  const confirmed = appointments.filter((a) => a.status === 'CONFIRMED').length
+  const cancelled = appointments.filter((a) => a.status === 'CANCELLED').length
+
+  const displayed =
+    filter !== 'ALL'
+      ? appointments.filter((a) => a.status === filter)
+      : appointments.filter((a) => tabStatuses(activeTab).includes(a.status))
+
+  const expandedAppt = appointments.find((a) => a.id === expandedId) ?? null
+  const toggleRow = (id: string) => setExpandedId((prev) => (prev === id ? null : id))
+
+  const statCards = [
+    { label: 'Total bookings', value: totalBookings },
+    { label: "Today's visits", value: todaysVisits },
+    { label: 'Confirmed', value: confirmed },
+    { label: 'Cancelled', value: cancelled },
+  ]
 
   return (
     <div className="bliss-admin-dash">
@@ -80,220 +128,228 @@ export default function AdminBookingsPage() {
         title="Bookings"
         description={
           <>
-            Full guest contact details and internal notes. Link clients from the{' '}
+            Guest contact details and internal notes. Link clients from the{' '}
             <Link href="/admin/clients" className="font-medium text-[#6b5344] underline-offset-2 hover:underline">
               Clients
             </Link>{' '}
-            page when they have an account.
+            page.
           </>
         }
-        actions={
-          <div className="flex flex-wrap gap-2">
-            {['ALL', ...STATUSES].map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setFilter(s)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
-                  filter === s
-                    ? 'bg-[#1e211e] text-[#f4e6cd]'
-                    : 'border border-[#1e211e]/10 bg-white text-text/50 hover:text-[#1e211e]'
-                }`}
-              >
-                {s.toLowerCase()}
-              </button>
-            ))}
-          </div>
-        }
-        className="!mb-8"
       />
 
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_minmax(280px,360px)]">
-        <div className="bg-white border border-[#1e211e]/10 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(30,33,30,0.05)]">
-          {displayed.length === 0 ? (
-            <p className="text-center text-text/40 py-12 text-sm">No bookings in this filter.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[720px]">
-                <thead className="bg-[#f4e6cd]/35">
-                  <tr>
-                    {['Client', 'Email', 'Service', 'When', 'Staff', 'Status', ''].map((h) => (
-                      <th
-                        key={h}
-                        className="text-left px-4 py-3 text-[10px] font-semibold text-text/45 uppercase tracking-[0.12em]"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayed.map((a) => (
-                    <tr
-                      key={a.id}
-                      className={`border-t border-[#1e211e]/8 cursor-pointer transition-colors ${
-                        selected?.id === a.id ? 'bg-[#f4e6cd]/40' : 'hover:bg-[#faf8f4]'
-                      }`}
-                      onClick={() => setSelected(a)}
+      <BookingBlocksPanel />
+
+      <section aria-labelledby="bookings-stats-heading" className="mb-10">
+        <h2 id="bookings-stats-heading" className="sr-only">Booking statistics</h2>
+        <div className="bliss-admin-stat-grid" role="list">
+          {statCards.map((s) => (
+            <div role="listitem" key={s.label}>
+              <div className="service-card-wrap group/scard flex h-full flex-col !cursor-default">
+                <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#edddc3]/50" aria-hidden>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#faf8f4] to-[#6b5344]/10" />
+                </div>
+                <div className="service-card-content-wrapper !py-4">
+                  <p className="font-display text-[1.85rem] leading-none tracking-tight text-[#1e211e] tabular-nums md:text-[2rem]">
+                    {s.value}
+                  </p>
+                  <p className="service-card-kicker mt-auto !text-[11px] !font-semibold !uppercase !tracking-[0.12em]">
+                    {s.label}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {['ALL', ...STATUSES].map((st) => (
+            <button
+              key={st}
+              type="button"
+              onClick={() => setFilter(st)}
+              className={
+                filter === st
+                  ? 'rounded-full bg-[#1e211e] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[#f4e6cd]'
+                  : 'rounded-full border border-[#1e211e]/10 bg-white px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-wide text-[#1e211e]/55 transition-colors hover:border-[#1e211e]/20 hover:text-[#1e211e]'
+              }
+            >
+              {st.toLowerCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-2 border-b border-[#1e211e]/10 pb-4">
+        {TABS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => { setActiveTab(key); setFilter('ALL'); setExpandedId(null) }}
+            className={
+              activeTab === key && filter === 'ALL'
+                ? 'rounded-full bg-[#f4e6cd] px-4 py-2 text-sm font-medium text-[#1e211e] ring-1 ring-[#1e211e]/10'
+                : 'rounded-full px-4 py-2 text-sm font-medium text-[#1e211e]/50 transition-colors hover:text-[#1e211e]'
+            }
+          >
+            {label}
+            <span className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-[#1e211e]/[0.06] px-1.5 py-0.5 text-[10px] font-bold text-[#1e211e]/70">
+              {appointments.filter((a) => tabStatuses(key).includes(a.status)).length}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="bliss-admin-card overflow-hidden">
+        {displayed.length === 0 ? (
+          <p className="py-14 text-center text-sm text-[#1e211e]/45">No bookings in this view.</p>
+        ) : (
+          <div className="bliss-admin-table-wrap">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead className="bg-[#f4e6cd]/35">
+                <tr>
+                  {['Client', 'Email', 'Service', 'When', 'Staff', 'Status', ''].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1e211e]/50 sm:px-6"
                     >
-                      <td className="px-4 py-3">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {displayed.map((a) => (
+                  <Fragment key={a.id}>
+                    <tr
+                      className={`cursor-pointer border-t border-[#1e211e]/8 transition-colors hover:bg-[#faf8f4]/90 ${expandedId === a.id ? 'bg-[#faf8f4]/90' : ''}`}
+                      onClick={() => toggleRow(a.id)}
+                    >
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
                         <p className="font-medium text-[#1e211e]">{a.clientName}</p>
-                        <p className="text-[11px] text-text/45 mt-0.5">{a.clientPhone}</p>
+                        <p className="mt-0.5 text-[11px] text-[#1e211e]/45">{a.clientPhone}</p>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
                         <a
                           href={`mailto:${a.clientEmail}`}
-                          className="text-[#6b5344] hover:underline text-xs"
+                          className="text-xs text-[#6b5344] hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {a.clientEmail}
                         </a>
                       </td>
-                      <td className="px-4 py-3 text-text/70">{a.service?.name}</td>
-                      <td className="px-4 py-3 text-text/70 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">{a.service?.name}</td>
+                      <td className="whitespace-nowrap px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">
                         {format(new Date(a.startTime), 'MMM d, yyyy')}
                         <br />
-                        <span className="text-text/50">
+                        <span className="text-[#1e211e]/45">
                           {format(new Date(a.startTime), 'h:mm a')} – {format(new Date(a.endTime), 'h:mm a')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-text/70">{a.staff?.name}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${
-                            a.status === 'CONFIRMED'
-                              ? 'bg-[#8FA896]/20 text-[#3d5c45]'
-                              : a.status === 'CANCELLED'
-                                ? 'bg-red-50 text-red-600'
-                                : a.status === 'COMPLETED'
-                                  ? 'bg-[#e8e4dc] text-text/60'
-                                  : 'bg-[#f4e6cd]/80 text-[#6b5344]'
-                          }`}
-                        >
+                      <td className="px-4 py-3.5 text-[#1e211e]/70 sm:px-6 sm:py-4">{a.staff?.name}</td>
+                      <td className="px-4 py-3.5 sm:px-6 sm:py-4">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${statusPill(a.status)}`}>
                           {a.status.toLowerCase()}
                         </span>
                       </td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <select
-                          value={a.status}
-                          onChange={(e) => updateStatus(a.id, e.target.value)}
-                          className="text-xs border border-[#1e211e]/15 rounded-lg px-2 py-1.5 bg-white text-[#1e211e] focus:outline-none focus:ring-1 focus:ring-[#6b5344]/30"
-                          aria-label={`Update status for ${a.clientName}`}
+                      <td className="px-4 py-3.5 text-right sm:px-6 sm:py-4">
+                        <span
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[#1e211e]/50 transition-all"
+                          style={{
+                            background: expandedId === a.id ? '#1e211e' : 'rgba(30,33,30,0.07)',
+                            color: expandedId === a.id ? '#f4e6cd' : undefined,
+                          }}
+                          aria-label={expandedId === a.id ? 'Collapse' : 'Expand'}
                         >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s.charAt(0) + s.slice(1).toLowerCase()}
-                            </option>
-                          ))}
-                        </select>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ transform: expandedId === a.id ? 'rotate(180deg)' : undefined, transition: 'transform 0.2s' }}>
+                            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
 
-        <aside className="bg-white border border-[#1e211e]/10 rounded-2xl p-6 shadow-[0_8px_30px_rgba(30,33,30,0.05)] xl:sticky xl:top-6">
-          {!selected ? (
-            <p className="text-sm text-text/50 leading-relaxed">
-              Select a row to view full booking details, email the guest, and add internal notes for your team.
-            </p>
-          ) : (
-            <div className="space-y-5">
-              <div>
-                <h2 className="font-display text-lg text-[#1e211e]">Booking details</h2>
-                <p className="text-[11px] text-text/40 mt-1 uppercase tracking-wider">
-                  Reference · {selected.id.slice(0, 8)}…
-                </p>
-              </div>
-              <dl className="space-y-3 text-sm">
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Guest</dt>
-                  <dd className="text-[#1e211e] font-medium mt-0.5">{selected.clientName}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Email</dt>
-                  <dd className="mt-0.5">
-                    <a
-                      href={`mailto:${selected.clientEmail}`}
-                      className="text-[#6b5344] hover:underline break-all"
-                    >
-                      {selected.clientEmail}
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Phone</dt>
-                  <dd className="mt-0.5">
-                    <a href={`tel:${selected.clientPhone}`} className="text-[#6b5344] hover:underline">
-                      {selected.clientPhone}
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Service</dt>
-                  <dd className="text-text/80 mt-0.5">{selected.service?.name ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Schedule</dt>
-                  <dd className="text-text/80 mt-0.5">
-                    {format(new Date(selected.startTime), 'EEEE, MMM d, yyyy')}
-                    <br />
-                    {format(new Date(selected.startTime), 'h:mm a')} –{' '}
-                    {format(new Date(selected.endTime), 'h:mm a')}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Staff</dt>
-                  <dd className="text-text/80 mt-0.5">{selected.staff?.name ?? '—'}</dd>
-                </div>
-                <div>
-                  <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40">Status</dt>
-                  <dd className="mt-1">
-                    <select
-                      value={selected.status}
-                      onChange={(e) => updateStatus(selected.id, e.target.value)}
-                      className="text-sm border border-[#1e211e]/15 rounded-lg px-3 py-2 w-full bg-white text-[#1e211e]"
-                    >
-                      {STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s.charAt(0) + s.slice(1).toLowerCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </dd>
-                </div>
-              </dl>
+                    {expandedId === a.id && expandedAppt && (
+                      <tr>
+                        <td colSpan={7} className="border-t border-[#1e211e]/8 bg-[#faf8f4]/50 px-0">
+                          <div className="grid gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_280px]">
+                            <div>
+                              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6b5344]">
+                                Booking #{expandedAppt.id.slice(0, 8)}…
+                              </p>
+                              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                  { label: 'Guest', value: expandedAppt.clientName },
+                                  { label: 'Phone', value: <a href={`tel:${expandedAppt.clientPhone}`} className="text-[#6b5344] hover:underline">{expandedAppt.clientPhone}</a> },
+                                  { label: 'Email', value: <a href={`mailto:${expandedAppt.clientEmail}`} className="break-all text-[#6b5344] hover:underline">{expandedAppt.clientEmail}</a> },
+                                  { label: 'Service', value: expandedAppt.service?.name ?? '—' },
+                                  { label: 'Staff', value: expandedAppt.staff?.name ?? '—' },
+                                  {
+                                    label: 'Schedule',
+                                    value: (
+                                      <>
+                                        {format(new Date(expandedAppt.startTime), 'EEE, MMM d')}
+                                        <br />
+                                        <span className="text-[11px] text-[#1e211e]/50">
+                                          {format(new Date(expandedAppt.startTime), 'h:mm a')} – {format(new Date(expandedAppt.endTime), 'h:mm a')}
+                                        </span>
+                                      </>
+                                    ),
+                                  },
+                                ].map(({ label, value }) => (
+                                  <div key={label}>
+                                    <span className={DT_LABEL}>{label}</span>
+                                    <span className={`${DT_VALUE} ${label === 'Guest' ? 'font-medium' : ''}`}>{value}</span>
+                                  </div>
+                                ))}
+                                <div>
+                                  <span className={DT_LABEL}>Status</span>
+                                  <select
+                                    value={expandedAppt.status}
+                                    onChange={(e) => { e.stopPropagation(); void updateStatus(expandedAppt.id, e.target.value) }}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="mt-1 w-full max-w-[200px] rounded-lg border border-[#1e211e]/12 bg-white px-3 py-2 text-xs text-[#1e211e] focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20"
+                                  >
+                                    {STATUSES.map((st) => (
+                                      <option key={st} value={st}>{st.charAt(0) + st.slice(1).toLowerCase()}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
 
-              <div>
-                <label
-                  htmlFor="booking-notes"
-                  className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text/40 block mb-2"
-                >
-                  Internal notes
-                </label>
-                <textarea
-                  id="booking-notes"
-                  value={noteDraft}
-                  onChange={(e) => setNoteDraft(e.target.value)}
-                  rows={4}
-                  placeholder="Private notes for staff (not shown to clients)…"
-                  className="w-full px-3 py-2.5 text-sm border border-[#1e211e]/15 rounded-xl bg-[#faf8f4] text-[#1e211e] placeholder:text-text/30 focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20 resize-y min-h-[100px]"
-                />
-                <button
-                  type="button"
-                  onClick={saveNotes}
-                  disabled={savingNotes}
-                  className="mt-2 w-full rounded-full bg-[#1e211e] py-2.5 text-xs font-semibold uppercase tracking-[0.1em] text-[#f4e6cd] hover:opacity-90 disabled:opacity-50"
-                >
-                  {savingNotes ? 'Saving…' : 'Save notes'}
-                </button>
-              </div>
-            </div>
-          )}
-        </aside>
+                            <div className="flex flex-col gap-2">
+                              <label htmlFor={`notes-${expandedAppt.id}`} className={DT_LABEL}>
+                                Internal notes
+                              </label>
+                              <textarea
+                                id={`notes-${expandedAppt.id}`}
+                                value={noteDraft}
+                                onChange={(e) => setNoteDraft(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                rows={5}
+                                placeholder="Private notes for staff (not shown to clients)…"
+                                className="min-h-[100px] w-full resize-y rounded-xl border border-[#1e211e]/12 bg-white px-3 py-2.5 text-sm text-[#1e211e] focus:outline-none focus:ring-2 focus:ring-[#6b5344]/20"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); void saveNotes() }}
+                                disabled={savingNotes}
+                                className="inline-flex items-center justify-center rounded-full bg-[#1e211e] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-[#f4e6cd] transition-opacity hover:opacity-90 disabled:opacity-50"
+                              >
+                                {savingNotes ? 'Saving…' : 'Save notes'}
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

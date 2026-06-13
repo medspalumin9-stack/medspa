@@ -46,6 +46,34 @@ export async function POST(req: NextRequest) {
 
     const end = addMinutes(start, service.durationMinutes)
 
+    const conflict = await prisma.appointment.findFirst({
+      where: {
+        staffId,
+        status: { notIn: ['CANCELLED'] },
+        startTime: { lt: end },
+        endTime: { gt: start },
+      },
+    })
+    if (conflict) {
+      return NextResponse.json(
+        { error: 'That time is no longer available. Please pick another slot.' },
+        { status: 409 },
+      )
+    }
+
+    const blocked = await prisma.bookingBlock.findFirst({
+      where: {
+        startAt: { lt: end },
+        endAt: { gt: start },
+      },
+    })
+    if (blocked) {
+      return NextResponse.json(
+        { error: 'That period is blocked for booking. Please choose a different time.' },
+        { status: 409 },
+      )
+    }
+
     let appointment: { id: string }
     try {
       appointment = await prisma.appointment.create({

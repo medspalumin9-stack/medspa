@@ -7,7 +7,6 @@ import {
   parseISO,
   setHours,
   setMinutes,
-  isBefore,
   isAfter,
   startOfDay,
   endOfDay,
@@ -15,22 +14,35 @@ import {
 
 const BUSINESS_START = 9
 const BUSINESS_END = 18
-const SLOT_INTERVAL = 30
+/** Start times are on a 1-hour grid (e.g. 9:00, 10:00, …). */
+const SLOT_STEP_MINUTES = 60
 
-function slotsForStaff(staffId: string, date: Date, existing: Appointment[]): string[] {
+function intervalsOverlap(s1: Date, e1: Date, s2: Date, e2: Date): boolean {
+  return s1 < e2 && e1 > s2
+}
+
+function slotsForDay(
+  date: Date,
+  appointments: Appointment[],
+  blocks: { startAt: Date; endAt: Date }[],
+  serviceDurationMin: number,
+): string[] {
   const dayStart = setMinutes(setHours(date, BUSINESS_START), 0)
   const dayEnd = setMinutes(setHours(date, BUSINESS_END), 0)
+
+  const busy = [
+    ...appointments.map((a) => ({ s: a.startTime, e: a.endTime })),
+    ...blocks.map((b) => ({ s: b.startAt, e: b.endAt })),
+  ]
 
   const slots: string[] = []
   let cursor = dayStart
 
-  while (isBefore(cursor, dayEnd)) {
-    const slotEnd = addMinutes(cursor, SLOT_INTERVAL)
-    const busy = existing.some(
-      (a) => isBefore(cursor, a.endTime) && isAfter(slotEnd, a.startTime)
-    )
-    if (!busy) slots.push(cursor.toISOString())
-    cursor = slotEnd
+  while (!isAfter(addMinutes(cursor, serviceDurationMin), dayEnd)) {
+    const slotEnd = addMinutes(cursor, serviceDurationMin)
+    const taken = busy.some(({ s, e }) => intervalsOverlap(cursor, slotEnd, s, e))
+    if (!taken) slots.push(cursor.toISOString())
+    cursor = addMinutes(cursor, SLOT_STEP_MINUTES)
   }
   return slots
 }
@@ -48,11 +60,25 @@ export async function GET(req: NextRequest) {
   try {
     const date = parseISO(dateStr)
 
+    const blockRows = await prisma.bookingBlock.findMany({
+      where: {
+        startAt: { lt: endOfDay(date) },
+        endAt: { gt: startOfDay(date) },
+      },
+    })
+    const blocks = blockRows.map((b) => ({ startAt: b.startAt, endAt: b.endAt }))
+
     if (serviceId) {
       const staffIds = await getStaffIdsForService(serviceId)
       if (staffIds.length === 0) {
         return NextResponse.json({ slots: [] as { startTime: string; staffId: string }[] })
       }
+
+      const service = await prisma.service.findUnique({
+        where: { id: serviceId },
+        select: { durationMinutes: true },
+      })
+      const durationMin = service?.durationMinutes ?? 60
 
       const allAppts = await prisma.appointment.findMany({
         where: {
@@ -72,7 +98,7 @@ export async function GET(req: NextRequest) {
       const merged = new Map<string, string>()
       for (const sid of staffIds) {
         const existing = byStaff.get(sid) ?? []
-        for (const t of slotsForStaff(sid, date, existing)) {
+        for (const t of slotsForDay(date, existing, blocks, durationMin)) {
           if (!merged.has(t)) merged.set(t, sid)
         }
       }
@@ -96,7 +122,7 @@ export async function GET(req: NextRequest) {
       },
     })
 
-    const timeStrings = slotsForStaff(staffIdParam, date, existing)
+    const timeStrings = slotsForDay(date, existing, blocks, 60)
     const slots = timeStrings.map((startTime) => ({
       startTime,
       staffId: staffIdParam,

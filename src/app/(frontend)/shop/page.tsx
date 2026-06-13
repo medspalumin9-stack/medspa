@@ -66,10 +66,10 @@ export default async function ShopPage() {
         <div className="container">
           <div className="services-wrapper">
             <div className="services-title-wrap">
-              <p className="service-card-kicker">The boutique</p>
+              <p className="service-card-kicker"></p>
               <h1 className="services-title">My Shop</h1>
               <p className="service-card-text mt-4 max-w-2xl">
-                Curated skincare to extend your glow at home. Tap WhatsApp on any product to message our team.
+                
               </p>
             </div>
             <div className="services-cards-wrap">

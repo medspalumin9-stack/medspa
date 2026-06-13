@@ -45,7 +45,7 @@ export function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute right-4 md:right-10 lg:right-16 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
+      <div className="absolute right-4 md:right-10 lg:right-16 top-1/2 -translate-y-1/2 z-10 pointer-events-none hidden md:block">
         <div className="clip-reveal">
           <motion.h1
             className="font-display italic font-normal text-[#FAF8F5] leading-[0.88]"
@@ -111,10 +111,23 @@ export function HeroSection() {
         </motion.div>
       </motion.div>
 
-      <div className="absolute bottom-24 md:bottom-28 left-auto right-4 md:right-10 lg:right-16 xl:right-24 text-right z-10 pointer-events-none w-[min(100%-1.5rem,28rem)] pl-8 ml-auto">
-        <p className="clip-reveal font-sans text-sm md:text-base font-normal text-white/40 mb-5 tracking-wide">
-          
-        </p>
+      <div className="relative z-20 -mt-1 px-4 pb-2 text-center md:hidden pointer-events-none">
+        <motion.h2
+          className="font-display font-normal leading-[1.05] text-[#FAF8F5]"
+          style={{ fontSize: 'clamp(2.35rem, 9vw, 3.25rem)' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: DELAY + 0.65, duration: 0.85, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <span className="italic">Glow</span>
+          <span className="mx-1.5 font-light text-white/35" aria-hidden>
+            ·
+          </span>
+          <span>Awaits.</span>
+        </motion.h2>
+      </div>
+
+      <div className="absolute bottom-24 md:bottom-28 left-auto right-4 md:right-10 lg:right-16 xl:right-24 z-10 hidden w-[min(100%-1.5rem,28rem)] pl-8 text-right md:block md:pointer-events-none">
         <div className="clip-reveal">
           <motion.h2
             className="font-display font-normal text-[#FAF8F5] leading-[0.88] text-right"

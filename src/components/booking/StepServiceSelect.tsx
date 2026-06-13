@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
+import { formatGhs } from '@/lib/format-currency'
 import { cn } from '@/lib/utils'
 
 type ServiceOption = {
@@ -150,7 +151,7 @@ export function StepServiceSelect({
                 </div>
                 <div className="service-card-content-wrapper !pt-3">
                   <p className="service-card-kicker">
-                    ${s.price} · {s.durationMinutes} min
+                    {formatGhs(s.price)} · {s.durationMinutes} min
                   </p>
                   <div className="service-card-title-wrap">
                     <div className="service-card-title !text-[1.35rem] !leading-snug md:!text-[1.5rem]">{s.name}</div>

@@ -41,9 +41,9 @@ export function Footer() {
               <h4 className="footer-info-title">Address</h4>
             </div>
             <div className="footer-info-text">
-              Your studio address
+              Ashongman Estate
               <br />
-              City, ST 00000
+              Accra, Ghana
             </div>
           </div>
           <div className="footer-info-wrap">
@@ -64,13 +64,13 @@ export function Footer() {
                 <span className="footer-info-icon" aria-hidden>
                   ☎
                 </span>
-                <span className="footer-link-text">+1 (000) 000-0000</span>
+                <span className="footer-link-text">+233545750702</span>
               </a>
               <a href="mailto:hello@luminmedspa.com" className="footer-info-link-wrap">
                 <span className="footer-info-icon" aria-hidden>
                   ✉
                 </span>
-                <span className="footer-link-text">hello@luminmedspa.com</span>
+                <span className="footer-link-text">medspalumin9@gmail.com</span>
               </a>
             </div>
           </div>

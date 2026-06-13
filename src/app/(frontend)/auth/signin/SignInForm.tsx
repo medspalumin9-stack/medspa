@@ -3,6 +3,7 @@ import { getSession, signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { postCredentialsLoginPath } from '@/lib/post-login-redirect'
 import { Input } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 
@@ -29,9 +30,13 @@ export function SignInForm({ defaultNext }: { defaultNext?: string }) {
     }
 
     const session = await getSession()
-    const role = (session?.user as { role?: string } | undefined)?.role
+    const u = session?.user as {
+      canAccessAdminPortal?: boolean
+      canAccessClientPortal?: boolean
+    } | undefined
     const safe = defaultNext && !defaultNext.startsWith('/auth') ? defaultNext : undefined
-    router.push(role === 'ADMIN' ? '/admin' : safe ?? '/dashboard')
+    const next = postCredentialsLoginPath(u ?? {})
+    router.push(next === '/dashboard' && safe ? safe : next)
     router.refresh()
   }
 

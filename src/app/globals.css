@@ -30,7 +30,10 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { overscroll-behavior: none; }
+html {
+  overscroll-behavior: none;
+  overflow-x: clip;
+}
 
 body {
   background-color: var(--surface);

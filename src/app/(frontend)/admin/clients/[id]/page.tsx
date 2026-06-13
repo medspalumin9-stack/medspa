@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { useParams, useRouter } from 'next/navigation'
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { formatGhs } from '@/lib/format-currency'
 
 type Appointment = {
   id: string
@@ -248,7 +249,7 @@ export default function AdminClientProfilePage() {
                           className="accent-[#6b5344]"
                         />
                         <span className="flex-1 truncate">{p.name}</span>
-                        <span className="text-xs text-[#1e211e]/40 flex-shrink-0">${p.price}</span>
+                        <span className="text-xs text-[#1e211e]/40 flex-shrink-0">{formatGhs(p.price)}</span>
                       </label>
                     ))}
                   </div>

@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
+import { formatGhs } from '@/lib/format-currency'
 
 interface ServiceCardProps {
   service: {
@@ -84,7 +85,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
           <div className="service-card-text-wrap">
             <p className="service-card-text">{excerpt}</p>
           </div>
-          <div className="service-card-price">${service.price}</div>
+          <div className="service-card-price">{formatGhs(service.price)}</div>
           <span className="tertiary-button">
             <span className="tertiary-button-text-wrap">
               <span className="tertiary-button-slide">

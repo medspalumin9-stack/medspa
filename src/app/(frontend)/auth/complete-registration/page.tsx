@@ -98,9 +98,10 @@ export default function CompleteRegistrationPage() {
       }
 
       const session = await getSession()
-      const role = (session?.user as { role?: string } | undefined)?.role
+      const u = session?.user as { canAccessAdminPortal?: boolean } | undefined
       const clientDest = returnTo ?? '/dashboard'
-      router.push(role === 'ADMIN' ? '/admin' : clientDest)
+      if (u?.canAccessAdminPortal) router.push('/admin')
+      else router.push(clientDest)
       router.refresh()
     } catch {
       setError('Something went wrong. Please try again.')

@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -50,77 +51,60 @@ export default function AdminClientsPage() {
         />
       </div>
 
-      <div className="bliss-admin-card overflow-hidden">
-        {loading ? (
-          <div className="py-14 flex flex-col items-center gap-3">
-            <div className="w-6 h-6 rounded-full border-2 border-[#1e211e]/15 border-t-[#6b5344] animate-spin" />
-            <p className="text-sm text-[#1e211e]/40">Loading clients…</p>
-          </div>
-        ) : filtered.length === 0 ? (
-          <p className="text-center text-[#1e211e]/40 py-14 text-sm">
-            {search ? 'No clients match that search.' : 'No registered clients yet.'}
-          </p>
-        ) : (
-          <div className="bliss-admin-table-wrap">
-            <table className="w-full text-sm min-w-[640px]">
-              <thead className="bg-[#f4e6cd]/35">
-                <tr>
-                  {['Client', 'Email', 'Phone', 'Bookings', 'Joined', ''].map(h => (
-                    <th
-                      key={h}
-                      className="text-left px-4 py-3 text-[10px] font-semibold text-[#1e211e]/50 uppercase tracking-[0.12em] sm:px-5"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(c => (
-                  <tr key={c.id} className="border-t border-[#1e211e]/8 transition-colors hover:bg-[#faf8f4]/90">
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#edddc3] flex items-center justify-center text-sm font-semibold text-[#6b5344] flex-shrink-0">
-                          {c.fullName.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-medium text-[#1e211e]">{c.fullName}</span>
+      {loading ? (
+        <div className="bliss-admin-card py-14 flex flex-col items-center gap-3">
+          <div className="w-6 h-6 rounded-full border-2 border-[#1e211e]/15 border-t-[#6b5344] animate-spin" />
+          <p className="text-sm text-[#1e211e]/40">Loading clients…</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <p className="text-center text-[#1e211e]/40 py-14 text-sm">
+          {search ? 'No clients match that search.' : 'No registered clients yet.'}
+        </p>
+      ) : (
+        <div className="services-cards-wrap">
+          <div className="service-list-wrapper">
+            <div role="list" className="service-list">
+              {filtered.map((c) => (
+                <div key={c.id} role="listitem">
+                  <Link
+                    href={`/admin/clients/${c.id}`}
+                    className="service-card-wrap group/scard flex h-full flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-[#6b5344]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#edddc3]"
+                  >
+                    <div className="service-card-image-wrap relative overflow-hidden" aria-hidden>
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#edddc3] via-[#f4e6cd] to-[#6b5344]/15" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="font-display text-5xl text-[#1e211e]/20">{c.fullName.charAt(0).toUpperCase()}</span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/60 sm:px-5 sm:py-4">
-                      <a href={`mailto:${c.email}`} className="hover:text-[#6b5344] hover:underline transition-colors">
-                        {c.email}
-                      </a>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/55 sm:px-5 sm:py-4">
-                      {c.phone ? (
-                        <a href={`tel:${c.phone}`} className="hover:text-[#6b5344] hover:underline transition-colors">
-                          {c.phone}
-                        </a>
-                      ) : '—'}
-                    </td>
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#f4e6cd]/80 text-[#6b5344]">
-                        {c._count.appointments} {c._count.appointments === 1 ? 'visit' : 'visits'}
+                    </div>
+                    <div className="service-card-content-wrapper">
+                      <p className="service-card-kicker">
+                        {c._count.appointments} {c._count.appointments === 1 ? 'visit' : 'visits'} · joined {format(new Date(c.createdAt), 'MMM yyyy')}
+                      </p>
+                      <div className="service-card-title-wrap">
+                        <div className="service-card-title">{c.fullName}</div>
+                      </div>
+                      <div className="service-card-text-wrap">
+                        <p className="service-card-text break-all">{c.email}</p>
+                        {c.phone ? (
+                          <p className="service-card-text mt-1 !text-[15px] opacity-75">{c.phone}</p>
+                        ) : null}
+                      </div>
+                      <span className="tertiary-button mt-2">
+                        <span className="tertiary-button-text-wrap">
+                          <span className="tertiary-button-slide">
+                            <span className="tertiary-button-text">View profile</span>
+                            <span className="tertiary-button-text">View profile</span>
+                          </span>
+                        </span>
                       </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-[#1e211e]/50 text-xs sm:px-5 sm:py-4 whitespace-nowrap">
-                      {format(new Date(c.createdAt), 'MMM d, yyyy')}
-                    </td>
-                    <td className="px-4 py-3.5 sm:px-5 sm:py-4">
-                      <Link
-                        href={`/admin/clients/${c.id}`}
-                        className="text-xs font-medium text-[#6b5344] hover:underline"
-                      >
-                        View profile →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

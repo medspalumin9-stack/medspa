@@ -3,6 +3,7 @@ import { FrontendChrome } from '@/components/layout/FrontendChrome'
 import { LoadingScreen } from '@/components/layout/LoadingScreen'
 import type { Metadata } from 'next'
 import '@/styles/blissoria-site.css'
+import '@/styles/sarasvvati.css'
 
 export const metadata: Metadata = {
   title: 'Lumin Medspa | Non-invasive skin rejuvenation',
@@ -20,7 +21,7 @@ export default function FrontendLayout({
       <div className="page-wrapper">
         <LoadingScreen />
         <FrontendChrome>
-          <main className="main flex-1">{children}</main>
+          <main className="main flex-1 min-w-0">{children}</main>
         </FrontendChrome>
       </div>
     </SessionProviders>

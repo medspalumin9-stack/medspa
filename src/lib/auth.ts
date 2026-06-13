@@ -2,15 +2,33 @@ import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 
+// NextAuth v5 uses AUTH_SECRET / AUTH_URL — alias from NEXTAUTH_ vars if needed
+if (!process.env.AUTH_SECRET && process.env.NEXTAUTH_SECRET) {
+  process.env.AUTH_SECRET = process.env.NEXTAUTH_SECRET
+}
+if (!process.env.AUTH_URL && process.env.NEXTAUTH_URL) {
+  process.env.AUTH_URL = process.env.NEXTAUTH_URL
+}
+
+/** Vercel builds often inherit `.env` with localhost; drop it so Auth uses the request host (trustHost). */
+if (process.env.VERCEL) {
+  const isLocalhostUrl = (v: string | undefined) =>
+    Boolean(v && (v.includes('localhost') || v.includes('127.0.0.1')))
+  if (isLocalhostUrl(process.env.AUTH_URL)) {
+    delete process.env.AUTH_URL
+  }
+  if (isLocalhostUrl(process.env.NEXTAUTH_URL)) {
+    delete process.env.NEXTAUTH_URL
+  }
+}
+
 function normalizeEmail(raw: unknown) {
-  return String(raw ?? '')
-    .trim()
-    .toLowerCase()
+  return String(raw ?? '').trim().toLowerCase()
 }
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
       name: 'credentials',
@@ -42,6 +60,15 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.fullName,
           role: user.role,
+          canAccessAdminPortal: user.canAccessAdminPortal,
+          canAccessClientPortal: user.canAccessClientPortal,
+          canAdminOverview: user.canAdminOverview,
+          canAdminBookings: user.canAdminBookings,
+          canAdminClients: user.canAdminClients,
+          canAdminServices: user.canAdminServices,
+          canAdminProducts: user.canAdminProducts,
+          canAdminStaff: user.canAdminStaff,
+          canAdminUsers: user.canAdminUsers,
         }
       },
     }),
@@ -52,14 +79,73 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
+        token.role = (user as { role?: string }).role
+        token.canAccessAdminPortal = (user as { canAccessAdminPortal?: boolean }).canAccessAdminPortal
+        token.canAccessClientPortal = (user as { canAccessClientPortal?: boolean }).canAccessClientPortal
+        token.canAdminOverview = (user as { canAdminOverview?: boolean }).canAdminOverview
+        token.canAdminBookings = (user as { canAdminBookings?: boolean }).canAdminBookings
+        token.canAdminClients = (user as { canAdminClients?: boolean }).canAdminClients
+        token.canAdminServices = (user as { canAdminServices?: boolean }).canAdminServices
+        token.canAdminProducts = (user as { canAdminProducts?: boolean }).canAdminProducts
+        token.canAdminStaff = (user as { canAdminStaff?: boolean }).canAdminStaff
+        token.canAdminUsers = (user as { canAdminUsers?: boolean }).canAdminUsers
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = String(token.id)
-        ;(session.user as any).role = token.role
+      if (session.user && token.sub) {
+        try {
+          const { prisma } = await import('./prisma')
+          const row = await prisma.user.findUnique({
+            where: { id: String(token.sub) },
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+              role: true,
+              canAccessAdminPortal: true,
+              canAccessClientPortal: true,
+              canAdminOverview: true,
+              canAdminBookings: true,
+              canAdminClients: true,
+              canAdminServices: true,
+              canAdminProducts: true,
+              canAdminStaff: true,
+              canAdminUsers: true,
+            },
+          })
+          if (row) {
+            session.user.id = row.id
+            session.user.email = row.email
+            session.user.name = row.fullName
+            ;(session.user as { role?: string }).role = row.role
+            ;(session.user as { canAccessAdminPortal?: boolean }).canAccessAdminPortal = row.canAccessAdminPortal
+            ;(session.user as { canAccessClientPortal?: boolean }).canAccessClientPortal = row.canAccessClientPortal
+            ;(session.user as { canAdminOverview?: boolean }).canAdminOverview = row.canAdminOverview
+            ;(session.user as { canAdminBookings?: boolean }).canAdminBookings = row.canAdminBookings
+            ;(session.user as { canAdminClients?: boolean }).canAdminClients = row.canAdminClients
+            ;(session.user as { canAdminServices?: boolean }).canAdminServices = row.canAdminServices
+            ;(session.user as { canAdminProducts?: boolean }).canAdminProducts = row.canAdminProducts
+            ;(session.user as { canAdminStaff?: boolean }).canAdminStaff = row.canAdminStaff
+            ;(session.user as { canAdminUsers?: boolean }).canAdminUsers = row.canAdminUsers
+          }
+        } catch {
+          if (session.user) {
+            session.user.id = String(token.id ?? token.sub)
+            ;(session.user as { role?: string }).role = token.role as string
+            ;(session.user as { canAccessAdminPortal?: boolean }).canAccessAdminPortal =
+              token.canAccessAdminPortal as boolean
+            ;(session.user as { canAccessClientPortal?: boolean }).canAccessClientPortal =
+              token.canAccessClientPortal as boolean
+            ;(session.user as { canAdminOverview?: boolean }).canAdminOverview = token.canAdminOverview as boolean
+            ;(session.user as { canAdminBookings?: boolean }).canAdminBookings = token.canAdminBookings as boolean
+            ;(session.user as { canAdminClients?: boolean }).canAdminClients = token.canAdminClients as boolean
+            ;(session.user as { canAdminServices?: boolean }).canAdminServices = token.canAdminServices as boolean
+            ;(session.user as { canAdminProducts?: boolean }).canAdminProducts = token.canAdminProducts as boolean
+            ;(session.user as { canAdminStaff?: boolean }).canAdminStaff = token.canAdminStaff as boolean
+            ;(session.user as { canAdminUsers?: boolean }).canAdminUsers = token.canAdminUsers as boolean
+          }
+        }
       }
       return session
     },

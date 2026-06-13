@@ -28,38 +28,59 @@ export default async function BookingPage({ searchParams }: BookingPageProps) {
         phone: dbUser?.phone ?? undefined,
       }
     } catch {
-      prefillData = {
-        name: session.user.name ?? undefined,
-        email: session.user.email,
-      }
+      prefillData = { name: session.user.name ?? undefined, email: session.user.email }
     }
   }
 
   const returnTo = safeInternalPath(params.next)
 
   return (
-    <div className="blissoria-services-scope min-h-screen">
-      <section className="services bliss-booking-section overflow-hidden">
-        <div className="container">
-          <div className="services-wrapper">
-            <div className="services-title-wrap !mb-4 !mt-0 md:!mb-5">
-              <p className="service-card-kicker">Book online</p>
-              <h1 className="services-title !text-[clamp(1.65rem,4vw,2.85rem)]">Book your visit</h1>
-              <p className="service-card-text mt-2 max-w-2xl text-[15px] md:mt-3 md:text-[17px]">
-                No deposit required. Confirmation is sent by email and SMS once you choose a time and confirm your
-                details.
-              </p>
-            </div>
-            <div className="services-cards-wrap w-full !mt-0 !pt-0">
-              <BookingWizard
-                preselectedServiceId={params.service}
-                prefillData={prefillData}
-                returnTo={returnTo}
-              />
-            </div>
-          </div>
+    /* Sarasvvati booking layout */
+    <div
+      style={{
+        minHeight: '100svh',
+        background: 'var(--sara-bg, #f5f0e8)',
+        paddingTop: '100px',
+        paddingBottom: '80px',
+      }}
+    >
+      {/* Hero heading */}
+      <div className="sara-container" style={{ marginBottom: '40px' }}>
+        <p
+          className="sara-kicker"
+          style={{ marginBottom: '12px' }}
+        >
+          Book online
+        </p>
+        <h1
+          className="sara-h1"
+          style={{ marginBottom: '12px', maxWidth: '640px' }}
+        >
+          Book your visit
+        </h1>
+        <p
+          style={{
+            fontSize: '16px',
+            color: 'rgba(30,27,24,0.55)',
+            maxWidth: '500px',
+            lineHeight: 1.6,
+          }}
+        >
+          No deposit required. Confirmation sent by email &amp; SMS once you
+          choose a time and confirm your details.
+        </p>
+      </div>
+
+      {/* Wizard */}
+      <div className="sara-container blissoria-services-scope">
+        <div className="services-cards-wrap w-full" style={{ padding: 0 }}>
+          <BookingWizard
+            preselectedServiceId={params.service}
+            prefillData={prefillData}
+            returnTo={returnTo}
+          />
         </div>
-      </section>
+      </div>
     </div>
   )
 }

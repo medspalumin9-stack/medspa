@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdminApi } from '@/lib/admin-guard'
 
 export async function GET() {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('services')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const services = await prisma.service.findMany({ orderBy: { createdAt: 'asc' } })
@@ -11,7 +11,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('services')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { name, description, durationMinutes, price, imageUrl, benefits, isActive } = await req.json()
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('services')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id, name, description, durationMinutes, price, imageUrl, benefits, isActive } = await req.json()
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('services')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)

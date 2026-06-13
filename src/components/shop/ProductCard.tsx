@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import Image from 'next/image'
 import { generateWhatsAppLink } from '@/lib/whatsapp'
+import { formatGhs } from '@/lib/format-currency'
 import { BLISSORIA_CARD_SIZES, blissoriaServiceThumbForIndex } from '@/lib/blissoria-card'
 
 interface Product {
@@ -70,9 +71,9 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
           <div className="service-card-text-wrap">
             <p className="service-card-text">{excerpt}</p>
           </div>
-          <div className="service-card-price">${product.price}</div>
+          <div className="service-card-price">{formatGhs(product.price)}</div>
           <a
-            href={generateWhatsAppLink(product.name, String(product.price))}
+            href={generateWhatsAppLink(product.name, product.price)}
             target="_blank"
             rel="noopener noreferrer"
             className="tertiary-button mt-2"

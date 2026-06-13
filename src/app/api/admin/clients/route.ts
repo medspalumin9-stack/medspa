@@ -3,11 +3,11 @@ import { prisma } from '@/lib/prisma'
 import { requireAdminApi } from '@/lib/admin-guard'
 
 export async function GET() {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('clients')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const clients = await prisma.user.findMany({
-    where: { role: 'CLIENT' },
+    where: { role: 'CLIENT', canAccessClientPortal: true },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,

@@ -17,9 +17,16 @@ type Appointment = {
 
 function MiniStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-[#1e211e]/8 bg-[#faf8f4]/90 px-4 py-3">
-      <p className="font-display text-2xl text-[#1e211e] leading-none tabular-nums">{value}</p>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text/45 mt-2">{label}</p>
+    <div className="service-card-wrap !cursor-default flex h-full flex-col">
+      <div className="service-card-image-wrap relative overflow-hidden rounded-[var(--bliss-radius-s)] bg-[#edddc3]/50" aria-hidden>
+        <div className="absolute inset-0 bg-gradient-to-br from-[#faf8f4] to-[#6b5344]/10" />
+      </div>
+      <div className="service-card-content-wrapper !py-4">
+        <p className="font-display text-2xl text-[#1e211e] leading-none tabular-nums md:text-[1.85rem]">{value}</p>
+        <p className="service-card-kicker !mb-0 !mt-3 !text-[10px] !font-semibold !uppercase !tracking-[0.14em] !text-[#8a7b6a]">
+          {label}
+        </p>
+      </div>
     </div>
   )
 }
@@ -72,7 +79,7 @@ export function AdminClientsBookingsDashboard() {
         <p className="text-center text-text/45 py-10 text-sm">Loading bookings…</p>
       ) : (
         <>
-          <div className="p-4 md:p-5 grid grid-cols-2 lg:grid-cols-5 gap-3 border-b border-[#1e211e]/8">
+          <div className="bliss-admin-mini-stat-grid p-4 md:p-5 grid grid-cols-2 lg:grid-cols-5 gap-3 border-b border-[#1e211e]/8">
             <MiniStat label="Total (loaded)" value={items.length} />
             <MiniStat label="Scheduled" value={scheduled} />
             <MiniStat label="Confirmed" value={confirmed} />

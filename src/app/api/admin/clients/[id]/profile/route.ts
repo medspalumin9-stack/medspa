@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdminApi } from '@/lib/admin-guard'
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await requireAdminApi()
+  const session = await requireAdminApi('clients')
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params

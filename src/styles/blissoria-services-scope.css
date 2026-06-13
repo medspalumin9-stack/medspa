@@ -25,8 +25,8 @@
   max-width: 1720px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
 }
 
 .blissoria-services-scope .services {
@@ -37,7 +37,7 @@
 
 /* Tighter gap below global nav for catalog-style pages (Services, Shop) */
 .blissoria-services-scope .services.services-tight-nav {
-  padding-top: 4.5rem;
+  padding-top: max(6rem, calc(env(safe-area-inset-top, 0px) + 4.75rem));
   padding-bottom: 100px;
 }
 
@@ -50,6 +50,10 @@
     padding-top: var(--bliss-services-pad-y);
     padding-bottom: 120px;
   }
+
+  .blissoria-services-scope .services.services-tight-nav {
+    padding-top: max(6.25rem, calc(env(safe-area-inset-top, 0px) + 5rem));
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -58,8 +62,13 @@
     padding-bottom: 100px;
   }
 
+  /* Admin catalog bar sits above the section — keep it below fixed nav */
+  .blissoria-services-scope > .bliss-container:first-child:has(.bliss-admin-manage-banner) {
+    padding-top: max(5.25rem, calc(env(safe-area-inset-top, 0px) + 4.25rem));
+  }
+
   .blissoria-services-scope .services.services-tight-nav {
-    padding-top: 4rem;
+    padding-top: max(7.5rem, calc(env(safe-area-inset-top, 0px) + 6.25rem));
     padding-bottom: 88px;
   }
 
@@ -70,7 +79,7 @@
 
 @media screen and (min-width: 768px) {
   .blissoria-services-scope .services.services-tight-nav {
-    padding-top: 5rem;
+    padding-top: max(6.25rem, calc(env(safe-area-inset-top, 0px) + 5rem));
     padding-bottom: 120px;
   }
 }

@@ -73,7 +73,8 @@ export function StepDateTimePicker({
     <div>
       <h2 className="service-card-title !mb-2 !text-[1.65rem] md:!text-[1.85rem]">Pick a date & time</h2>
       <p className="service-card-text mb-6 !text-[15px] opacity-80">
-        Choose any available day—browse by month and year—then pick a time slot.
+        Times are offered on the hour (9am–6pm). We show only slots where your full treatment fits and no one else is
+        booked.
       </p>
 
       <div className="mb-5 rounded-[var(--bliss-radius-s)] border border-[#1e211e]/12 bg-white/90 p-4 shadow-[0_8px_24px_rgba(30,33,30,0.06)]">

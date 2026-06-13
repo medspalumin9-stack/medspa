@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { requireAdminApi } from '@/lib/admin-guard'
+import { auth } from '@/lib/auth'
+import { userHasAdminSection } from '@/lib/admin-sections'
+import type { SessionUserWithAdmin } from '@/lib/admin-guard'
 import { getSupabaseAdmin, getStorageBucket } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await requireAdminApi()
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await auth()
+    if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const u = session.user as SessionUserWithAdmin
+    if (
+      !u.canAccessAdminPortal
+      || (!userHasAdminSection(u, 'services') && !userHasAdminSection(u, 'products'))
+    ) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const formData = await req.formData()
     const file = formData.get('file') as File | null
