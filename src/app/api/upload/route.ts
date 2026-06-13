@@ -4,7 +4,7 @@ import { join } from 'path'
 import { auth } from '@/lib/auth'
 import { userHasAdminSection } from '@/lib/admin-sections'
 import type { SessionUserWithAdmin } from '@/lib/admin-guard'
-import { getSupabaseAdmin, getStorageBucket } from '@/lib/supabase'
+import { getSupabaseAdmin, getStorageBucket, missingSupabaseEnvVars } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,8 +52,13 @@ export async function POST(req: NextRequest) {
 
     // Filesystem writes only work locally — Vercel/serverless hosts have a read-only disk
     if (process.env.VERCEL) {
+      const missing = missingSupabaseEnvVars()
       return NextResponse.json(
-        { error: 'Image uploads are not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' },
+        {
+          error: missing.length
+            ? `Image uploads are not configured on Vercel. Add ${missing.join(' and ')} in Vercel → Project Settings → Environment Variables (enable Production), then redeploy.`
+            : 'Image uploads are not configured on Vercel.',
+        },
         { status: 503 },
       )
     }
